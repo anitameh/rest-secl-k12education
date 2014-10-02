@@ -10,57 +10,73 @@
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <script src="http://d3js.org/queue.v1.min.js"></script>
         <script src="http://d3js.org/topojson.v1.min.js"></script>
-        <script src="../libs/FileSaver.js"></script>
+        <script src="libs/FileSaver.js"></script>
         <div id="vis"></div>
 
         <script type="text/javascript">
 
 
             // begin D3 code            
-            d3.csv("data/original-data.csv", function(error, data){
+            d3.csv("data/original-data.csv", function(error, data) {
 
             	// initialize variables
             	var allData = {};
-            	var newFormatData = {};
+            	var newFormatData = [];
             	var states = [];
             	var myvals = {};
 
-            	// KEYS = unique states
-                data.forEach( function(d) {
-                	states.push(d.State);
+                // Create a dictionary {district_name: {school: {secl, mech, phys, enroll} } }
+                newFormatData = [];
+                newdata = data.slice(0,50);
+                // newdata = data;
+                
+                newdata.forEach( function(d) {
+
+                	var innerdictKeys = d3.keys(newFormatData);
+                	var stateName = d.State;
+                	var districtName = stateName + ", " + d.District_name;
+               
+                	if ((innerdictKeys).indexOf(districtName) < 0) {
+                		newFormatData[districtName] = [];
+
+                		var oneSchool = {};
+	                	var variables = {};
+	                	var schoolName = d.School_name;
+	                		
+	                	variables["dis_mech"] = parseInt(d.idea_mech_restraints)+parseInt(d.section_504_mech_restraints);
+	                	variables["dis_phys"] = parseInt(d.idea_phys_restraints)+parseInt(d.section_504_phys_restraints);
+	                	variables["dis_secl"] = parseInt(d.idea_seclusion)+parseInt(d.section_504_seclusion);
+	                	variables["mech"] = parseInt(d.no_dis_mech_restraints);
+	                	variables["phys"] = parseInt(d.no_dis_phys_restraints);
+	                	variables["secl"] = parseInt(d.no_dis_seclusion);
+	                	variables["total_enroll"] = parseInt(d.total_enrollment);
+	                	oneSchool[schoolName] = variables;
+
+	                	(newFormatData[districtName]).push(oneSchool); // add the first one
+	                }
+	                else {
+	                	var oneSchool = {};
+	                	var variables = {};
+	                	var schoolName = d.School_name;
+	                		
+	                	variables["dis_mech"] = parseInt(d.idea_mech_restraints)+parseInt(d.section_504_mech_restraints);
+	                	variables["dis_phys"] = parseInt(d.idea_phys_restraints)+parseInt(d.section_504_phys_restraints);
+	                	variables["dis_secl"] = parseInt(d.idea_seclusion)+parseInt(d.section_504_seclusion);
+	                	variables["mech"] = parseInt(d.no_dis_mech_restraints);
+	                	variables["phys"] = parseInt(d.no_dis_phys_restraints);
+	                	variables["secl"] = parseInt(d.no_dis_seclusion);
+	                	variables["total_enroll"] = parseInt(d.total_enrollment);
+	                	oneSchool[schoolName] = variables;
+
+	                	// push the rest
+		                (newFormatData[districtName]).push(oneSchool);
+	                }
+	                
                 });
+				console.log("writing to JSON...");
+				// console.log(newFormatData);
 
-                var mykeys = _.uniq(states);
-
-                for (var i in mykeys) {
-                	newFormatData[ mykeys[i] ] = [];
-                }
-
-                // VALUES = a dictionary {district_name: {school: {secl, mech, phys, enroll} } }
-                data.forEach( function(d) {
-
-                	// create a dictionary for each district
-                	var mydistrict = {};
-                	var variables = {};
-                	variables["dis_mech"] = parseInt(d.idea_mech_restraints)+parseInt(d.section_504_mech_restraints);
-                	variables["dis_phys"] = parseInt(d.idea_phys_restraints)+parseInt(d.section_504_phys_restraints);
-                	variables["dis_secl"] = parseInt(d.idea_seclusion)+parseInt(d.section_504_seclusion);
-                	variables["mech"] = parseInt(d.no_dis_mech_restraints);
-                	variables["phys"] = parseInt(d.no_dis_phys_restraints);
-                	variables["secl"] = parseInt(d.no_dis_seclusion);
-                	variables["total_enroll"] = parseInt(d.total_enrollment);
-                	var school_name = d.School_name;
-
-                	// mydistrict[d.District_name] = { school_name: variables };
-
-                	// push dictionary to corresponding state, only if district name is not already in there
-                	// if ( (newFormatData[d.State]).indexOf( d.District_name ) < 0 ) {
-                	// 	(newFormatData[d.State]).push(mydistrict); // instead of pushing just the dictionary name, push the entire dictionary for this district
-                	// }
-                	
-                });
-
-                console.log(newFormatData);
+	            saveToFile(newFormatData, "seclRestReformatData.json");
 
             });
             
