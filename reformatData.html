@@ -17,21 +17,25 @@
 
     		d3.csv("data/original-data.csv", function(error, data) {
 
-    			// newdata = data.slice(0,50)
-    			// console.log("got the data");
-    			// console.log(data[0]);
+    			newdata = data.slice(0,50)
 
     			var nestData = d3.nest()
 	    			.key(function(d) { return d.State; })
 	    			.key(function(d) { return d.District_name; })
 	    			.key(function(d) { return d.School_name; })
-	    			.entries(data);
+	    			.rollup(function(leaves) { return { "dis_mech_restraints": d3.sum(leaves, function(d) {return parseInt(d.idea_mech_restraints)+parseInt(d.section_504_mech_restraints)}),
+	    												"dis_phys_restraints": d3.sum(leaves, function(d) {return parseInt(d.idea_phys_restraints)+parseInt(d.section_504_phys_restraints)}),
+	    												"dis_seclusions": d3.sum(leaves, function(d) {return parseInt(d.idea_seclusion)+parseInt(d.section_504_seclusion)}),
+	    												"no_dis_mech_restraints": d3.sum(leaves, function(d) {return parseInt(d.no_dis_mech_restraints)}),
+	    												"no_dis_phys_restraints": d3.sum(leaves, function(d) {return parseInt(d.no_dis_physrestraints)}),
+	    												"no_dis_seclusions": d3.sum(leaves, function(d) {return parseInt(d.no_dis_seclusion)}),
+	    												"total_enroll": d3.sum(leaves, function(d) {return parseInt(d.total_enrollment)}) }; })
+	    			.entries(newdata);
 
 	    		console.log("nestData");
 	    		console.log(nestData);
 
-	    		saveToFile(nestData, "nestData.json")
-	    		// saveToFile(nestData, "subsetNestData.json");
+	    		// saveToFile(nestData, "reformattedData.json")
     		})
 
 			// saveToFile function
@@ -39,7 +43,6 @@
 		        var blob, blobText;
 
 		        blobText = [JSON.stringify(object)];
-		        console.log(blobText);
 		        blob = new Blob(blobText, {
 		            type: "text/plain;charset=utf-8"
 		        });
