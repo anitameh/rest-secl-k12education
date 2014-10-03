@@ -15,81 +15,40 @@
 
         <script type="text/javascript">
 
+    		d3.csv("data/original-data.csv", function(error, data) {
 
-            // begin D3 code            
-            d3.csv("data/original-data.csv", function(error, data) {
+    			// newdata = data.slice(0,50)
+    			// console.log("got the data");
+    			// console.log(data[0]);
 
-            	// initialize variables
-            	var allData = {};
-            	var newFormatData = [];
-            	var states = [];
-            	var myvals = {};
+    			var nestData = d3.nest()
+	    			.key(function(d) { return d.State; })
+	    			.key(function(d) { return d.District_name; })
+	    			.key(function(d) { return d.School_name; })
+	    			.entries(data);
 
-                // Create a dictionary {district_name: {school: {secl, mech, phys, enroll} } }
-                newFormatData = [];
-                newdata = data.slice(0,50);
-                // newdata = data;
-                
-                newdata.forEach( function(d) {
+	    		console.log("nestData");
+	    		console.log(nestData);
 
-                	var innerdictKeys = d3.keys(newFormatData);
-                	var stateName = d.State;
-                	var districtName = stateName + ", " + d.District_name;
-               
-                	if ((innerdictKeys).indexOf(districtName) < 0) {
-                		newFormatData[districtName] = [];
+	    		saveToFile(nestData, "nestData.json")
+	    		// saveToFile(nestData, "subsetNestData.json");
+    		})
 
-                		var oneSchool = {};
-	                	var variables = {};
-	                	var schoolName = d.School_name;
-	                		
-	                	variables["dis_mech"] = parseInt(d.idea_mech_restraints)+parseInt(d.section_504_mech_restraints);
-	                	variables["dis_phys"] = parseInt(d.idea_phys_restraints)+parseInt(d.section_504_phys_restraints);
-	                	variables["dis_secl"] = parseInt(d.idea_seclusion)+parseInt(d.section_504_seclusion);
-	                	variables["mech"] = parseInt(d.no_dis_mech_restraints);
-	                	variables["phys"] = parseInt(d.no_dis_phys_restraints);
-	                	variables["secl"] = parseInt(d.no_dis_seclusion);
-	                	variables["total_enroll"] = parseInt(d.total_enrollment);
-	                	oneSchool[schoolName] = variables;
-
-	                	(newFormatData[districtName]).push(oneSchool); // add the first one
-	                }
-	                else {
-	                	var oneSchool = {};
-	                	var variables = {};
-	                	var schoolName = d.School_name;
-	                		
-	                	variables["dis_mech"] = parseInt(d.idea_mech_restraints)+parseInt(d.section_504_mech_restraints);
-	                	variables["dis_phys"] = parseInt(d.idea_phys_restraints)+parseInt(d.section_504_phys_restraints);
-	                	variables["dis_secl"] = parseInt(d.idea_seclusion)+parseInt(d.section_504_seclusion);
-	                	variables["mech"] = parseInt(d.no_dis_mech_restraints);
-	                	variables["phys"] = parseInt(d.no_dis_phys_restraints);
-	                	variables["secl"] = parseInt(d.no_dis_seclusion);
-	                	variables["total_enroll"] = parseInt(d.total_enrollment);
-	                	oneSchool[schoolName] = variables;
-
-	                	// push the rest
-		                (newFormatData[districtName]).push(oneSchool);
-	                }
-	                
-                });
-				console.log("writing to JSON...");
-				// console.log(newFormatData);
-
-	            saveToFile(newFormatData, "seclRestReformatData.json");
-
-            });
-            
-
-            // saveToFile function
+			// saveToFile function
             var saveToFile = function(object, filename) {
 		        var blob, blobText;
+
 		        blobText = [JSON.stringify(object)];
+		        console.log(blobText);
 		        blob = new Blob(blobText, {
 		            type: "text/plain;charset=utf-8"
 		        });
+		        
 		        saveAs(blob, filename);
-		    }
+		    };
+        
+
+            
 
         </script>
 
