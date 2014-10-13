@@ -250,10 +250,6 @@ d3.csv("data/california-merged.csv", function(error, data) {
 	var no_dis_seclusions_keys = d3.keys(no_dis_seclusions).slice(0, 26);
 
 
-	console.log("dis = " + dis_phys_restraints_vals);
-	console.log("no dis = " + no_dis_phys_restraints_vals);
-
-
 	// HIST #1a: MECHANICAL, DISABLED
 	x0.domain(dis_mech_restraints_vals.map( function(d, i) { return i; } ));
 	y0.domain( [0, Math.ceil(d3.max(dis_mech_restraints_vals))] );
