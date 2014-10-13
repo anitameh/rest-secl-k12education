@@ -15,6 +15,7 @@ var width = 960 - margin.left - margin.right,
 	subWidth = width/4
 	subHeight = height/5.;
 
+// svg
 var svg = d3.select("body").append("svg")
 		.attr("width", width)
 		.attr("height", height)
@@ -142,6 +143,12 @@ var yAxis5 = d3.svg.axis()
 	.orient("left")
 		.ticks(10);
 
+// tooltip
+var div = d3.select("body").append("div")
+	.attr("class", "tooltip")
+	.style("opacity", 0);
+
+
 
 
 
@@ -201,8 +208,8 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			dis_seclusions[theschool_name] = (parseInt(data[theschool_index].idea_seclusion)+parseInt(data[theschool_index].section_504_seclusion)) / theschool_enroll;
 			
 			no_dis_mech_restraints[theschool_name] = parseInt(data[theschool_index].no_dis_phys_restraints) / theschool_enroll;
-			no_dis_phys_restraints[theschool_name] = parseInt(data[theschool_index].idea_phys_restraints) / theschool_enroll;
-			no_dis_seclusions[theschool_name] = parseInt(data[theschool_index].idea_seclusion) / theschool_enroll;
+			no_dis_phys_restraints[theschool_name] = parseInt(data[theschool_index].no_dis_phys_restraints) / theschool_enroll;
+			no_dis_seclusions[theschool_name] = parseInt(data[theschool_index].no_dis_seclusion) / theschool_enroll;
 
 		}
 
@@ -216,31 +223,35 @@ d3.csv("data/california-merged.csv", function(error, data) {
 	// var dis_mech_restraints_vals = d3.values(dis_mech_restraints); // mechanical, disabled
 	var dis_mech_restraints_vals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 
 							13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
-	// var dis_phys_restraints_vals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 
-	// 						13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+	var dis_mech_restraints_keys = d3.keys(dis_mech_restraints).slice(0, 26);
 
 	var dis_phys = d3.values(dis_phys_restraints); // physical, disabled
 	var dis_phys_restraints_vals = _.map(dis_phys, function(num) { return num*100; });
-	// console.log("dis_phys_restraints_vals = " + dis_phys_restraints_vals);
+	var dis_phys_restraints_keys = d3.keys(dis_phys_restraints);
+
 	
 	// var dis_seclusions = d3.values(dis_seclusions); // seclusions, disabled
 	var dis_seclusions_vals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 
-							13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];	
+							13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+	var dis_seclusions_keys = d3.keys(dis_mech_restraints).slice(0, 26);	
 
 	// var no_dis_mech_restraints_vals = d3.values(no_dis_mech_restraints); // mechanical, not disabled
 	var no_dis_mech_restraints_vals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 
 							13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+	var no_dis_mech_restraints_keys = d3.keys(no_dis_mech_restraints).slice(0, 26);
 
 	var no_dis_phys = d3.values(no_dis_phys_restraints); // physical, not disabled
 	var no_dis_phys_restraints_vals = _.map(no_dis_phys, function(num) { return num*100; });
+	var no_dis_phys_restraints_keys = d3.keys(no_dis_phys_restraints);
 
 	// var no_dis_seclusions_vals = d3.values(no_dis_seclusions); // seclusions, not disabled
 	var no_dis_seclusions_vals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 
 							13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+	var no_dis_seclusions_keys = d3.keys(no_dis_seclusions).slice(0, 26);
 
 
-	console.log(d3.keys(no_dis_phys_restraints));
-	// console.log(Math.round(1.1));
+	console.log("dis = " + dis_phys_restraints_vals);
+	console.log("no dis = " + no_dis_phys_restraints_vals);
 
 
 	// HIST #1a: MECHANICAL, DISABLED
@@ -262,7 +273,7 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("y", 6)
 			.attr("dy", ".71em")
 			.style("text-anchor", "end")
-			.text("% Mechanical (Disabled)");
+			.text("Mechanical (Disabled)");
 
 	// append bars
 	svg.selectAll("bar")
@@ -272,12 +283,27 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("x", function(d, i) { return x0(i); })
 			.attr("width", x0.rangeBand())
 			.attr("y", function(d) { return y0(d); })
-			.attr("height", function(d) { return subHeight - y0(d); });
+			.attr("height", function(d) { return subHeight - y0(d); })
+			.on("mouseover", function(d, i) {
+				div.transition()
+					.duration(200)
+					.style("opacity", 0.9);
+				div.html(dis_mech_restraints_keys[i] + "<br/>" + dis_mech_restraints_vals[i].toFixed(2) + "%")
+					.style("left", (d3.event.pageX - 37.5) + "px")
+					.style("top", (d3.event.pageY - 60) + "px");
+			})
+			.on("mouseout", function(d) {
+				div.transition()
+					.duration(500)
+					.style("opacity", 0);
+			});
 
 
 	// HIST #1b: PHYSICAL, DISABLED
 	x1.domain(dis_phys_restraints_vals.map( function(d, i) { return i; } ));
-	y1.domain( [0, Math.ceil(d3.max(dis_phys_restraints_vals))] );
+	// y1.domain( [0, Math.ceil(d3.max(dis_phys_restraints_vals))] );
+	y1.domain( [0, 1] );
+
 
 	// append xAxis
 	svg.append("g")
@@ -295,9 +321,8 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("y", 6)
 			.attr("dy", ".71em")
 			.style("text-anchor", "end")
-			.text("% Physical (Disabled)");
+			.text("Physical (Disabled)");
 
-	// append bars
 	svg.selectAll("bar")
 			.data(dis_phys_restraints_vals)
 		.enter().append("rect")
@@ -307,8 +332,21 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("y", function(d) { return y1(d); })
 			.attr("height", function(d) { return subHeight - y1(d); })
 			.style("fill", "red")
-			.on("mouseover", function() { d3.select(this).style("fill", "purple") })
-			.on("mouseout", function() { d3.select(this).style("fill", "red") });
+			.on("mouseover", function(d, i) {
+				d3.select(this).style("fill", "purple");
+				div.transition()
+					.duration(200)
+					.style("opacity", 0.9);
+				div.html(dis_phys_restraints_keys[i] + "<br/>" + dis_phys_restraints_vals[i].toFixed(2) + "%")
+					.style("left", (d3.event.pageX - 37.5) + "px")
+					.style("top", (d3.event.pageY - 60) + "px");
+			})
+			.on("mouseout", function(d) {
+				d3.select(this).style("fill", "red");
+				div.transition()
+					.duration(500)
+					.style("opacity", 0);
+			});
 
 
 	// HIST #1c: SECLUSIONS, DISABLED
@@ -331,7 +369,7 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("y", 6)
 			.attr("dy", ".71em")
 			.style("text-anchor", "end")
-			.text("% Seclusions (Disabled)");
+			.text("Seclusions (Disabled)");
 
 	svg.selectAll("bar")
 		.data(dis_seclusions_vals)
@@ -342,8 +380,21 @@ d3.csv("data/california-merged.csv", function(error, data) {
 		.attr("y", function(d) { return y2(d); })
 		.attr("height", function(d) { return subHeight - y2(d); })
 		.style("fill", "gold")
-		.on("mouseover", function() { d3.select(this).style("fill", "orange") })
-		.on("mouseout", function() { d3.select(this).style("fill", "gold") });
+		.on("mouseover", function(d, i) {
+			d3.select(this).style("fill", "orange");
+			div.transition()
+				.duration(200)
+				.style("opacity", 0.9);
+			div.html(dis_seclusions_keys[i] + "<br/>" + dis_seclusions_vals[i].toFixed(2) + "%")
+				.style("left", (d3.event.pageX - 37.5) + "px")
+				.style("top", (d3.event.pageY - 60) + "px");
+		})
+		.on("mouseout", function(d) {
+			d3.select(this).style("fill", "gold");
+			div.transition()
+				.duration(500)
+				.style("opacity", 0);
+		});
 
 
 	// HIST #2a: MECHANICAL, NOT DISABLED
@@ -366,7 +417,7 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("y", 6)
 			.attr("dy", ".71em")
 			.style("text-anchor", "end")
-			.text("% Mechanical (Not Disabled)");
+			.text("Mechanical (Not Disabled)");
 
 	// append bars
 	svg.selectAll("bar")
@@ -376,7 +427,20 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("x", function(d, i) { return x3(i); })
 			.attr("width", x3.rangeBand())
 			.attr("y", function(d) { return y3(d); })
-			.attr("height", function(d) { return (50 + 2*subHeight) - y3(d); });
+			.attr("height", function(d) { return (50 + 2*subHeight) - y3(d); })
+			.on("mouseover", function(d, i) {
+				div.transition()
+					.duration(200)
+					.style("opacity", 0.9);
+				div.html(no_dis_mech_restraints_keys[i] + "<br/>" + no_dis_mech_restraints_vals[i].toFixed(2) + "%")
+					.style("left", (d3.event.pageX - 37.5) + "px")
+					.style("top", (d3.event.pageY - 60) + "px");
+			})
+			.on("mouseout", function(d) {
+				div.transition()
+					.duration(500)
+					.style("opacity", 0);
+			});
 
 
 	// HIST #2b: PHYSICAL, NOT DISABLED
@@ -400,7 +464,7 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("y", 6)
 			.attr("dy", ".71em")
 			.style("text-anchor", "end")
-			.text("% Physical (Not Disabled)");
+			.text("Physical (Not Disabled)");
 
 	// append bars
 	svg.selectAll("bar")
@@ -412,8 +476,22 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("y", function(d) { return y4(d); })
 			.attr("height", function(d) { return (50 + 2*subHeight) - y4(d); })
 			.style("fill", "red")
-			.on("mouseover", function() { d3.select(this).style("fill", "purple") })
-			.on("mouseout", function() { d3.select(this).style("fill", "red") });
+			.on("mouseover", function(d, i) {
+				d3.select(this).style("fill", "purple");
+				div.transition()
+					.duration(200)
+					.style("opacity", 0.9);
+				div.html(no_dis_phys_restraints_keys[i] + "<br/>" + no_dis_phys_restraints_vals[i].toFixed(2) + "%")
+					.style("left", (d3.event.pageX - 37.5) + "px")
+					.style("top", (d3.event.pageY - 60) + "px");
+			})
+			.on("mouseout", function(d) {
+				d3.select(this).style("fill", "red");
+				div.transition()
+					.duration(500)
+					.style("opacity", 0);
+			});
+
 
 
 	// HIST #2c: SECLUSIONS, NOT DISABLED
@@ -437,7 +515,7 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("y", 6)
 			.attr("dy", ".71em")
 			.style("text-anchor", "end")
-			.text("% Seclusions (Not Disabled)");
+			.text("Seclusions (Not Disabled)");
 
 	// append bars
 	svg.selectAll("bar")
@@ -449,8 +527,21 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("y", function(d) { return y5(d); })
 			.attr("height", function(d) { return (50 + 2*subHeight) - y5(d); })
 			.style("fill", "gold")
-			.on("mouseover", function() { d3.select(this).style("fill", "orange") })
-			.on("mouseout", function() { d3.select(this).style("fill", "gold") });
+			.on("mouseover", function(d, i) {
+				d3.select(this).style("fill", "orange");
+				div.transition()
+					.duration(200)
+					.style("opacity", 0.9);
+				div.html(no_dis_seclusions_keys[i] + "<br/>" + no_dis_seclusions_vals[i].toFixed(2) + "%")
+					.style("left", (d3.event.pageX - 37.5) + "px")
+					.style("top", (d3.event.pageY - 60) + "px");
+			})
+			.on("mouseout", function(d) {
+				d3.select(this).style("fill", "gold");
+				div.transition()
+					.duration(500)
+					.style("opacity", 0);
+			});
 
 });
 
