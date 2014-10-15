@@ -12,7 +12,7 @@ var margin = {
 
 var width = 960 - margin.left - margin.right,
 	height = 1160 - margin.bottom - margin.top,
-	subWidth = width/4
+	subWidth = width ;
 	subHeight = height/5.;
 
 // svg
@@ -42,37 +42,86 @@ var yAxis0 = d3.svg.axis()
 		.ticks(10);
 
 
+
+var x1 = d3.scale.ordinal()
+	.rangeRoundBands( [0, subWidth], .1 );
+
+var y1 = d3.scale.linear()
+	.range( [50 + 2*subHeight, 50 + subHeight] );
+
+var xAxis1 = d3.svg.axis()
+	.scale(x1)
+	.tickSize(0, 0)
+	.orient("bottom");
+
+xAxis1.tickFormat( function(d) { return ''; });
+
+var yAxis1 = d3.svg.axis()
+	.scale(y1)
+	.orient("left")
+		.ticks(10);
+
+
+var x2 = d3.scale.ordinal()
+	.rangeRoundBands( [0, subWidth], .1 );
+
+var y2 = d3.scale.linear()
+	.range( [100 + 3*subHeight, 100 + 2*subHeight] );
+
+var xAxis2 = d3.svg.axis()
+	.scale(x2)
+	.tickSize(0, 0)
+	.orient("bottom");
+
+xAxis2.tickFormat( function(d) { return ''; });
+
+var yAxis2 = d3.svg.axis()
+	.scale(y2)
+	.orient("left")
+		.ticks(10);
+
+
+// tooltip
+var div = d3.select("body").append("div")
+	.attr("class", "tooltip")
+	.style("opacity", 0);
+
+
+
 d3.csv("data/original-data.csv", function(error, data) {
 
-	// step 1. get data for particular state
-	var state = "CA";
+	// Step 1. get data for particular state
+	var state = "PA";
 	var stateData = getStateData(data, state);
-	console.log(stateData.length);
+	console.log(stateData[0]);
 	
-	// step 2. make bar graphs, overlayed
-	console.log(data[0]);
-	// initialize variables
-	
-	mech_restraints = getSeclRest(stateData, "mech_restraints");
+	// get data for punishments
+	mech_restraints = getSeclRest(stateData, "mech");
 	var dis_mech_restraints = mech_restraints[0];
 	var no_dis_mech_restraints = mech_restraints[1];
 
-	console.log(dis_mech_restraints);
-	console.log(no_dis_mech_restraints);
-	// var no_dis_mech_restraints = [];
+	phys_restraints = getSeclRest(stateData, "phys");
+	var dis_phys_restraints = phys_restraints[0];
+	var no_dis_phys_restraints = phys_restraints[1];
+
+	seclusions = getSeclRest(stateData, "seclusion");
+	var dis_seclusions = seclusions[0];
+	var no_dis_seclusions = seclusions[1];
 	
-	// var dis_phys_restraints = [];
-	// var no_dis_phys_restraints = [];
-	
-	// var dis_seclusions = [];
-	// var no_dis_seclusions = [];
+	// Step 2. make bar graphs, overlayed
 
 	// make bar graphs
-	
+	makeBarGraph(dis_mech_restraints, 0);
+	makeBarGraph(dis_phys_restraints, 1);
+	makeBarGraph(dis_seclusions, 2);
 
+	// overlay non-disabled bar graphs
 
-	// step 3. make map of US
+	// step 3. make tiny map of US states
 	// step 4. link map with bar graphs
+	// step 5. decorate (title = state name; bar graph = total number of occurrences; adjust tooltip to match number of lines; tiny triangle)
+	// step 6. additional information: click on a bar to see additional information about that city rel to state
+
 
 });
 
@@ -80,39 +129,144 @@ d3.csv("data/original-data.csv", function(error, data) {
 var getStateData = function(data, state) {
 
 	var alldata = [];
+
 	data.forEach(function(d) {
-		// console.log(d.State);
 		if (d.State == state) {
 			alldata.push(d);
 		}
 	});
+
 	return alldata;
 }
 
 // get data for particular punishment
 var getSeclRest = function(data, punishment_type) {
-
-	// var alldata_dis = [];
-	// var punish_dis0 = "d.idea_" + punishment_type;
-	// var punish_dis1 = "d.section_504_" + punishment_type;
-	// console.log(punish_dis0 + ", " + typeof(punish_dis0));
 	
-	// var alldata_no_dis = [];
-	// var punish_no_dis = "d.no_dis_" + punishment_type;
-		
+	var alldata_dis = [];
+	var alldata_no_dis = [];
+
 	data.forEach(function(d) {	
-		
-		// disabled
-		var sum_dis = parseInt(d.idea_mech_restraints) + parseInt(d.section_504_mech_restraints);
-		if (sum_dis != 0) { alldata_dis[d.School_name] = sum_dis; }	
+		// total enrollment
+		var TE = parseInt(d.total_enrollment);
 	
-		// not disabled
-		if (d.no_dis_mech_restraints != "0") { alldata_no_dis[d.School_name] = parseInt(d.no_dis_mech_restraints); }
-
+		if (punishment_type == "mech") {
+			// disabled
+			var sum_dis = parseInt(d.idea_mech_restraints) + parseInt(d.section_504_mech_restraints);
+			var dis_percent = sum_dis/TE;
+			if (sum_dis != 0 && dis_percent <= 1 ) { alldata_dis[d.School_name] = sum_dis/parseInt(d.total_enrollment); }	
+			// not disabled
+			var no_dis_percent = parseInt(d.no_dis_mech_restraints)/TE;
+			if (d.no_dis_mech_restraints != "0" && no_dis_percent <= 1) { alldata_no_dis[d.School_name] = no_dis_percent; }
+		}
+		else if (punishment_type == "phys") {
+			// disabled
+			var sum_dis = parseInt(d.idea_phys_restraints) + parseInt(d.section_504_phys_restraints);
+			var dis_percent = sum_dis/TE;
+			if (sum_dis != 0 && dis_percent <= 1) { alldata_dis[d.School_name] = sum_dis/parseInt(d.total_enrollment); }	
+			// not disabled
+			var no_dis_percent = parseInt(d.no_dis_phys_restraints)/TE;
+			if (d.no_dis_phys_restraints != "0") { alldata_no_dis[d.School_name] = no_dis_percent; }		
+		}
+		else {
+			// disabled
+			var sum_dis = parseInt(d.idea_seclusion) + parseInt(d.section_504_seclusion);
+			var dis_percent = sum_dis/TE;
+			if (sum_dis != 0 && dis_percent <= 1) { alldata_dis[d.School_name] = sum_dis/parseInt(d.total_enrollment); }	
+			// not disabled
+			var no_dis_percent = parseInt(d.no_dis_seclusion)/TE;
+			if (d.no_dis_seclusion != "0") { alldata_no_dis[d.School_name] = no_dis_percent; }		
+		}
 	});
 
-	return [alldata_dis, alldata_no_dis];
+	return [alldata_dis, alldata_no_dis];	
 }
+
+var makeBarGraph = function(data, plotNum) {
+
+	var keys = d3.keys(data);
+	var vals = d3.values(data);
+	var percents = _.map(vals, function(num) { return num*100; });
+	console.log(percents);
+	console.log(keys);
+	console.log(percents.length);
+	percents = percents.slice(0,425);
+
+	if (plotNum == 0) {
+		var x = x0; var y = y0;
+		var xAxis = xAxis0;
+		var yAxis = yAxis0;
+		var thisWidth = 0;
+		var thisHeight = subHeight;
+		var label = "Mechanical Restraints";
+	}
+	else if (plotNum == 1) {
+		var x = x1; var y = y1;
+		var xAxis = xAxis1;
+		var yAxis = yAxis1;
+		// var thisWidth = 50 + subWidth;
+		var thisWidth = 0;
+		var thisHeight = 50 + 2*subHeight;
+		var label = "Physical Restraints";
+		
+	}
+	else {
+		var x = x2; var y = y2;
+		var xAxis = xAxis2;
+		var yAxis = yAxis2;
+		// var thisWidth = 100 + 2*subWidth;
+		var thisWidth = 0;
+		var thisHeight = 100 + 3*subHeight;
+		label = "Seclusions";
+	}
+	
+	// set up domains
+	x.domain(percents.map( function(d, i) { return i; } ));
+	console.log("max = " + Math.ceil(d3.max(percents)));
+	y.domain( [0, Math.ceil(d3.max(percents))] );
+
+	// append xAxis
+	svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + thisHeight + ")")
+		.call(xAxis);
+
+	// append yAxis
+	svg.append("g")
+			.attr("class", "y axis")
+			.call(yAxis)
+		.append("text")
+			.attr("transform", "rotate(-90)")
+			.attr("x", -(50 + subHeight)*plotNum)
+			.attr("y", 5)
+			.attr("dy", ".71em")
+			.style("text-anchor", "end")
+			.text(label);
+
+	// append bars
+	svg.selectAll("bar")
+			.data(percents)
+		.enter().append("rect")
+			.attr("class", "bar")
+			.attr("x", function(d, i) { return x(i); })
+			.attr("width", x.rangeBand())
+			.attr("y", function(d) { return y(d); })
+			.attr("height", function(d) { return thisHeight - y(d); })
+			.on("mouseover", function(d, i) {
+				div.transition()
+					.duration(200)
+					.style("opacity", 0.9);
+				div.html(keys[i] + "<br/>" + percents[i].toFixed(2) + "%")
+					.style("left", (d3.event.pageX - 37.5) + "px")
+					.style("top", (d3.event.pageY - 60) + "px");
+			})
+			.on("mouseout", function(d) {
+				div.transition()
+					.duration(500)
+					.style("opacity", 0);
+			});
+}
+
+
 
 // // mechanical, disabled 
 // var x0 = d3.scale.ordinal()
