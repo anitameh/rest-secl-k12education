@@ -150,8 +150,6 @@ var div = d3.select("body").append("div")
 
 
 
-
-
 d3.csv("data/california-merged.csv", function(error, data) {
 
 	// get all schools
@@ -296,7 +294,16 @@ d3.csv("data/california-merged.csv", function(error, data) {
 
 
 	// HIST #1b: PHYSICAL, DISABLED
-	x1.domain(dis_phys_restraints_vals.map( function(d, i) { return i; } ));
+	var dis_phys_restraints_vals_NZ = [];
+	var dis_phys_restraints_keys_NZ = [];
+	dis_phys_restraints_vals.forEach(function(d, i) {
+		if (d != 0) {
+			dis_phys_restraints_vals_NZ.push(d);
+			dis_phys_restraints_keys_NZ.push(dis_phys_restraints_keys[i]);
+		}
+	});
+
+	x1.domain(dis_phys_restraints_vals_NZ.map( function(d, i) { return i; } ));
 	// y1.domain( [0, Math.ceil(d3.max(dis_phys_restraints_vals))] );
 	y1.domain( [0, 1] );
 
@@ -319,26 +326,28 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.style("text-anchor", "end")
 			.text("Physical (Disabled)");
 
+
 	svg.selectAll("bar")
-			.data(dis_phys_restraints_vals)
+			.data(dis_phys_restraints_vals_NZ)
 		.enter().append("rect")
 			.attr("class", "bar")
-			.attr("x", function(d, i) { return 50 + subWidth + x1(i); })
+			.attr("x", function(d, i) { 
+				console.log("x(i) = " + x1(i));
+				console.log(50 + subWidth + x1(i)); 
+				return 50 + subWidth + x1(i); 
+			})
 			.attr("width", x1.rangeBand())
 			.attr("y", function(d) { return y1(d); })
 			.attr("height", function(d) { return subHeight - y1(d); })
-			.style("fill", "red")
 			.on("mouseover", function(d, i) {
-				d3.select(this).style("fill", "purple");
 				div.transition()
 					.duration(200)
 					.style("opacity", 0.9);
-				div.html(dis_phys_restraints_keys[i] + "<br/>" + dis_phys_restraints_vals[i].toFixed(2) + "%")
+				div.html(dis_phys_restraints_keys_NZ[i] + "<br/>" + dis_phys_restraints_vals_NZ[i].toFixed(2) + "%")
 					.style("left", (d3.event.pageX - 37.5) + "px")
 					.style("top", (d3.event.pageY - 60) + "px");
 			})
 			.on("mouseout", function(d) {
-				d3.select(this).style("fill", "red");
 				div.transition()
 					.duration(500)
 					.style("opacity", 0);
@@ -375,9 +384,7 @@ d3.csv("data/california-merged.csv", function(error, data) {
 		.attr("width", x2.rangeBand())
 		.attr("y", function(d) { return y2(d); })
 		.attr("height", function(d) { return subHeight - y2(d); })
-		.style("fill", "gold")
 		.on("mouseover", function(d, i) {
-			d3.select(this).style("fill", "orange");
 			div.transition()
 				.duration(200)
 				.style("opacity", 0.9);
@@ -386,7 +393,6 @@ d3.csv("data/california-merged.csv", function(error, data) {
 				.style("top", (d3.event.pageY - 60) + "px");
 		})
 		.on("mouseout", function(d) {
-			d3.select(this).style("fill", "gold");
 			div.transition()
 				.duration(500)
 				.style("opacity", 0);
@@ -424,7 +430,9 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("width", x3.rangeBand())
 			.attr("y", function(d) { return y3(d); })
 			.attr("height", function(d) { return (50 + 2*subHeight) - y3(d); })
+			.style("fill", "SlateBlue")
 			.on("mouseover", function(d, i) {
+				d3.select(this).style("fill", "gold");
 				div.transition()
 					.duration(200)
 					.style("opacity", 0.9);
@@ -433,6 +441,7 @@ d3.csv("data/california-merged.csv", function(error, data) {
 					.style("top", (d3.event.pageY - 60) + "px");
 			})
 			.on("mouseout", function(d) {
+				d3.select(this).style("fill", "SlateBlue")
 				div.transition()
 					.duration(500)
 					.style("opacity", 0);
@@ -471,9 +480,9 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("width", x4.rangeBand())
 			.attr("y", function(d) { return y4(d); })
 			.attr("height", function(d) { return (50 + 2*subHeight) - y4(d); })
-			.style("fill", "red")
+			.style("fill", "SlateBlue")
 			.on("mouseover", function(d, i) {
-				d3.select(this).style("fill", "purple");
+				d3.select(this).style("fill", "gold");
 				div.transition()
 					.duration(200)
 					.style("opacity", 0.9);
@@ -482,7 +491,7 @@ d3.csv("data/california-merged.csv", function(error, data) {
 					.style("top", (d3.event.pageY - 60) + "px");
 			})
 			.on("mouseout", function(d) {
-				d3.select(this).style("fill", "red");
+				d3.select(this).style("fill", "SlateBlue");
 				div.transition()
 					.duration(500)
 					.style("opacity", 0);
@@ -522,9 +531,9 @@ d3.csv("data/california-merged.csv", function(error, data) {
 			.attr("width", x5.rangeBand())
 			.attr("y", function(d) { return y5(d); })
 			.attr("height", function(d) { return (50 + 2*subHeight) - y5(d); })
-			.style("fill", "gold")
+			.style("fill", "SlateBlue")
 			.on("mouseover", function(d, i) {
-				d3.select(this).style("fill", "orange");
+				d3.select(this).style("fill", "gold");
 				div.transition()
 					.duration(200)
 					.style("opacity", 0.9);
@@ -533,12 +542,22 @@ d3.csv("data/california-merged.csv", function(error, data) {
 					.style("top", (d3.event.pageY - 60) + "px");
 			})
 			.on("mouseout", function(d) {
-				d3.select(this).style("fill", "gold");
+				d3.select(this).style("fill", "SlateBlue");
 				div.transition()
 					.duration(500)
 					.style("opacity", 0);
 			});
 
+
+
+	//////////////////////////////////////////////////
+	// 3. create table for searched school
+	/////////////////////////////////////////////////
+
+	var table_title = main_school_obj.School_name;
+
+	// create table
+	// var table = d3.select("body").append("table")
 });
 
 
