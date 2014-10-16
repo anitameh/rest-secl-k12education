@@ -12,8 +12,11 @@ var margin = {
 
 var width = 960 - margin.left - margin.right,
 	height = 1160 - margin.bottom - margin.top,
-	subWidth = width ;
-	subHeight = height/5.;
+	subWidth = width;
+	subHeight = height/7.;
+
+console.log("width = " + width);
+console.log("subwidth = " + subWidth);
 
 // svg
 var svg = d3.select("body").append("svg")
@@ -23,6 +26,8 @@ var svg = d3.select("body").append("svg")
 		.attr("transform", "translate(" + margin.left + "," + margin.top +")");
 
 // axes
+var shiftRight = 600;
+
 var x0 = d3.scale.ordinal()
 	.rangeRoundBands( [0, subWidth], .1 );
 
@@ -39,8 +44,7 @@ xAxis0.tickFormat( function(d) { return ''; });
 var yAxis0 = d3.svg.axis()
 	.scale(y0)
 	.orient("left")
-		.ticks(10);
-
+		.ticks(5);
 
 
 var x1 = d3.scale.ordinal()
@@ -59,7 +63,7 @@ xAxis1.tickFormat( function(d) { return ''; });
 var yAxis1 = d3.svg.axis()
 	.scale(y1)
 	.orient("left")
-		.ticks(10);
+		.ticks(5);
 
 
 var x2 = d3.scale.ordinal()
@@ -78,7 +82,7 @@ xAxis2.tickFormat( function(d) { return ''; });
 var yAxis2 = d3.svg.axis()
 	.scale(y2)
 	.orient("left")
-		.ticks(10);
+		.ticks(5);
 
 
 // tooltip
@@ -91,31 +95,23 @@ var div = d3.select("body").append("div")
 d3.csv("data/original-data.csv", function(error, data) {
 
 	// Step 1. get data for particular state
-	var state = "PA";
+	var state = "CA";
 	var stateData = getStateData(data, state);
 	console.log(stateData[0]);
 	
 	// get data for punishments
 	mech_restraints = getSeclRest(stateData, "mech");
-	var dis_mech_restraints = mech_restraints[0];
-	var no_dis_mech_restraints = mech_restraints[1];
-
+	console.log( "mech =" );
+	console.log( d3.values(mech_restraints) );
 	phys_restraints = getSeclRest(stateData, "phys");
-	var dis_phys_restraints = phys_restraints[0];
-	var no_dis_phys_restraints = phys_restraints[1];
-
 	seclusions = getSeclRest(stateData, "seclusion");
-	var dis_seclusions = seclusions[0];
-	var no_dis_seclusions = seclusions[1];
 	
 	// Step 2. make bar graphs, overlayed
 
 	// make bar graphs
-	makeBarGraph(dis_mech_restraints, 0);
-	makeBarGraph(dis_phys_restraints, 1);
-	makeBarGraph(dis_seclusions, 2);
-
-	// overlay non-disabled bar graphs
+	makeBarGraph(mech_restraints, 0);
+	makeBarGraph(phys_restraints, 1);
+	makeBarGraph(seclusions, 2);
 
 	// step 3. make tiny map of US states
 	// step 4. link map with bar graphs
@@ -142,60 +138,79 @@ var getStateData = function(data, state) {
 // get data for particular punishment
 var getSeclRest = function(data, punishment_type) {
 	
-	var alldata_dis = [];
-	var alldata_no_dis = [];
+	var alldata = [];
 
 	data.forEach(function(d) {	
-		// total enrollment
-		var TE = parseInt(d.total_enrollment);
+
+		var TE = parseInt(d.total_enrollment); // total enrollment
 	
 		if (punishment_type == "mech") {
-			// disabled
+			
 			var sum_dis = parseInt(d.idea_mech_restraints) + parseInt(d.section_504_mech_restraints);
 			var dis_percent = sum_dis/TE;
-			if (sum_dis != 0 && dis_percent <= 1 ) { alldata_dis[d.School_name] = sum_dis/parseInt(d.total_enrollment); }	
-			// not disabled
 			var no_dis_percent = parseInt(d.no_dis_mech_restraints)/TE;
-			if (d.no_dis_mech_restraints != "0" && no_dis_percent <= 1) { alldata_no_dis[d.School_name] = no_dis_percent; }
+
+			if ((sum_dis != 0 && dis_percent <=1 ) || (no_dis_percent != 0 && no_dis_percent <= 1)) {
+				alldata[d.School_name] = [dis_percent, no_dis_percent];
+			}
+
 		}
 		else if (punishment_type == "phys") {
-			// disabled
+
 			var sum_dis = parseInt(d.idea_phys_restraints) + parseInt(d.section_504_phys_restraints);
 			var dis_percent = sum_dis/TE;
-			if (sum_dis != 0 && dis_percent <= 1) { alldata_dis[d.School_name] = sum_dis/parseInt(d.total_enrollment); }	
-			// not disabled
 			var no_dis_percent = parseInt(d.no_dis_phys_restraints)/TE;
-			if (d.no_dis_phys_restraints != "0") { alldata_no_dis[d.School_name] = no_dis_percent; }		
+
+			if ((sum_dis != 0 && dis_percent <=1 ) || (no_dis_percent != 0 && no_dis_percent <= 1)) {
+				alldata[d.School_name] = [dis_percent, no_dis_percent];
+			}	
+
 		}
 		else {
-			// disabled
+
 			var sum_dis = parseInt(d.idea_seclusion) + parseInt(d.section_504_seclusion);
 			var dis_percent = sum_dis/TE;
-			if (sum_dis != 0 && dis_percent <= 1) { alldata_dis[d.School_name] = sum_dis/parseInt(d.total_enrollment); }	
-			// not disabled
 			var no_dis_percent = parseInt(d.no_dis_seclusion)/TE;
-			if (d.no_dis_seclusion != "0") { alldata_no_dis[d.School_name] = no_dis_percent; }		
+
+			if ((sum_dis != 0 && dis_percent <=1 ) || (no_dis_percent != 0 && no_dis_percent <= 1)) {
+				alldata[d.School_name] = [dis_percent, no_dis_percent];
+			}	
+					
 		}
+
 	});
 
-	return [alldata_dis, alldata_no_dis];	
+	return alldata;	
 }
 
 var makeBarGraph = function(data, plotNum) {
 
+	// data
 	var keys = d3.keys(data);
 	var vals = d3.values(data);
-	var percents = _.map(vals, function(num) { return num*100; });
-	console.log(percents);
-	console.log(keys);
-	console.log(percents.length);
-	percents = percents.slice(0,425);
+
+	var vals_dis = [];
+	var vals_no_dis = [];
+
+	vals.forEach(function(d) {
+		vals_dis.push( d[0] );
+		vals_no_dis.push( d[1] );
+	});
+
+	var percents_dis = _.map(vals_dis, function(num) { return num*100; });
+	var percents_no_dis = _.map(vals_no_dis, function(num) { return num*100; });
+
+	percents_dis = percents_dis.slice(0,425);
+	percents_no_dis = percents_no_dis.slice(0, 425);
+
+	// for legend
+	var colors = ["RoyalBlue", "SkyBlue"];
+	var labels = ["With disabilities", "Without disabilities"];
 
 	if (plotNum == 0) {
 		var x = x0; var y = y0;
-		var xAxis = xAxis0;
+		var xAxis = xAxis0; 
 		var yAxis = yAxis0;
-		var thisWidth = 0;
 		var thisHeight = subHeight;
 		var label = "Mechanical Restraints";
 	}
@@ -203,36 +218,40 @@ var makeBarGraph = function(data, plotNum) {
 		var x = x1; var y = y1;
 		var xAxis = xAxis1;
 		var yAxis = yAxis1;
-		// var thisWidth = 50 + subWidth;
-		var thisWidth = 0;
 		var thisHeight = 50 + 2*subHeight;
 		var label = "Physical Restraints";
-		
 	}
 	else {
 		var x = x2; var y = y2;
 		var xAxis = xAxis2;
 		var yAxis = yAxis2;
 		// var thisWidth = 100 + 2*subWidth;
-		var thisWidth = 0;
 		var thisHeight = 100 + 3*subHeight;
 		label = "Seclusions";
 	}
 	
 	// set up domains
-	x.domain(percents.map( function(d, i) { return i; } ));
-	console.log("max = " + Math.ceil(d3.max(percents)));
-	y.domain( [0, Math.ceil(d3.max(percents))] );
+	x.domain(percents_dis.map( function(d, i) { return i; } ));
+
+	var max_dis = Math.ceil(d3.max(percents_dis));
+	var max_no_dis = Math.ceil(d3.max(percents_no_dis));
+	if (max_dis > max_no_dis) {
+		y.domain( [0, max_dis] );
+	}
+	else {
+		y.domain( [0, max_no_dis] );
+	}
 
 	// append xAxis
 	svg.append("g")
 		.attr("class", "x axis")
-		.attr("transform", "translate(0," + thisHeight + ")")
+		.attr("transform", "translate(" + shiftRight + "," + thisHeight + ")")
 		.call(xAxis);
 
 	// append yAxis
 	svg.append("g")
 			.attr("class", "y axis")
+			.attr("transform", "translate(" + shiftRight + ",0)")
 			.call(yAxis)
 		.append("text")
 			.attr("transform", "rotate(-90)")
@@ -242,12 +261,12 @@ var makeBarGraph = function(data, plotNum) {
 			.style("text-anchor", "end")
 			.text(label);
 
-	// append bars
+	// append bars for students with disabilities
 	svg.selectAll("bar")
-			.data(percents)
+			.data(percents_dis)
 		.enter().append("rect")
 			.attr("class", "bar")
-			.attr("x", function(d, i) { return x(i); })
+			.attr("x", function(d, i) { return x(i)+shiftRight+2; })
 			.attr("width", x.rangeBand())
 			.attr("y", function(d) { return y(d); })
 			.attr("height", function(d) { return thisHeight - y(d); })
@@ -255,7 +274,7 @@ var makeBarGraph = function(data, plotNum) {
 				div.transition()
 					.duration(200)
 					.style("opacity", 0.9);
-				div.html(keys[i] + "<br/>" + percents[i].toFixed(2) + "%")
+				div.html(keys[i] + "<br/> <font color='red'>" + percents_dis[i].toFixed(2) + "% </font>")
 					.style("left", (d3.event.pageX - 37.5) + "px")
 					.style("top", (d3.event.pageY - 60) + "px");
 			})
@@ -264,6 +283,54 @@ var makeBarGraph = function(data, plotNum) {
 					.duration(500)
 					.style("opacity", 0);
 			});
+
+	// append bars for students without disabilities
+	svg.selectAll("bar")
+			.data(percents_no_dis)
+		.enter().append("rect")
+			.attr("class", "bar")
+			.attr("x", function(d, i) { return x(i) + shiftRight; })
+			.attr("width", x.rangeBand())
+			.attr("y", function(d) { return y(d); })
+			.attr("height", function(d) { return thisHeight - y(d); })
+			.style("fill", "SkyBlue")
+			.style("opacity", 0.75)
+			.on("mouseover", function(d, i) {
+				d3.select(this).style("fill", "gold");
+				div.transition()
+					.duration(200)
+					.style("opacity", 0.9);
+				div.html(keys[i] + "<br/> <font color='red'>" + percents_no_dis[i].toFixed(2) + "% </font>")
+					.style("left", (d3.event.pageX - 37.5) + "px")
+					.style("top", (d3.event.pageY - 60) + "px");
+			})
+			.on("mouseout", function(d) {
+				d3.select(this).style("fill", "SkyBlue");
+				d3.select(this).style("opacity", 0.75);
+				div.transition()
+					.duration(500)
+					.style("opacity", 0);
+			});
+
+	// make legend
+	// var legend = svg.selectAll("legend")
+	// 		.data(colors)
+	// 	.enter().append("g")
+	// 		.attr("class", "legend")
+	// 		.attr("transform", function(d, i) { return "translate(0," + (i*20 - 5) + ")"; });
+
+	// legend.append("rect")
+	// 		.attr("x", subWidth-80)
+	// 		.attr("width", 18)
+	// 		.attr("height", 18)
+	// 		.style("fill", function(d) { return d; });
+	
+	// legend.append("text")
+	// 	.attr("x", subWidth-85)
+	// 	.attr("y", 9)
+	// 	.attr("dy", ".35em")
+	// 	.style("text-anchor", "end")
+	// 	.text(function(d, i) { return labels[i]; });
 }
 
 
