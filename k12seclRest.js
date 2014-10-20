@@ -12,7 +12,7 @@ var margin = {
 
 var width = 960 - margin.left - margin.right,
 	height = 1160 - margin.bottom - margin.top,
-	subWidth = width/4
+	subWidth = width/4;
 	subHeight = height/5.;
 
 // svg
