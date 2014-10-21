@@ -138,6 +138,7 @@ d3.json("data/us-named.json", function(error, us) {
 });
 
 // initial bar graph
+var bars_dis, bars_no_dis;
 var state = "CO"; // get data for particular state
 createStateVis(state);
 
@@ -151,11 +152,31 @@ function clicked(d) {
   	// remove old bars/y-axis/legend
   	stateVis.selectAll("rect")
   		.transition()
-  		.duration(100)
+  		.duration(75)
   		.remove();
+
+  	// bars_dis.exit().transition()
+  	// 	.delay(function(d,i) { return i*20; })
+  	// 	.duration(300)
+  	// 	// .attr("x", function(d,i) { return -400; })
+  	// 	// .attr("y", function(d,i) { return -400; })
+  	// 	.remove();
+  	
+  	// bars_no_dis.exit().transition()
+  	// 	.delay(function(d,i) { return i*20; })
+  	// 	.duration(300)
+  	// 	// .attr("x", function(d,i) { return -400; })
+  	// 	// .attr("y", function(d,i) { return -400; })
+  	// 	.remove();
+
   	stateVis.selectAll(".y.axis")
   		.transition()
-  		.duration(100)
+  		.duration(75)
+  		.remove();
+
+  	stateVis.selectAll("legend")
+  		.transition()
+  		.duration(75)
   		.remove();
 
   	// update
@@ -169,7 +190,7 @@ function clicked(d) {
 function createStateVis(state) {
 
 	// initialize
-	var mech_restraints; var phys_restraints; var seclusions;
+	var mech_restraints, phys_restraints, seclusions;
 	var pathname = "data/" + state + ".csv";
 	
 	d3.csv(pathname, function(error, stateData) {
@@ -322,8 +343,8 @@ function makeBarGraph(data, plotNum) {
 			.duration(100);
 
 	// append bars for students with disabilities
-	stateVis.selectAll("bar")
-			.data(percents_dis)
+	// bars_dis = stateVis.selectAll("bar").data(percents_dis);
+	stateVis.selectAll("bar").data(percents_dis)
 		.enter().append("rect")
 			.attr("class", "bar")
 			.attr("x", function(d, i) { return x(i)+shiftRight; })
@@ -348,8 +369,8 @@ function makeBarGraph(data, plotNum) {
 				.duration(500);
 
 	// append bars for students without disabilities
-	stateVis.selectAll("bar")
-			.data(percents_no_dis)
+	// bars_no_dis = stateVis.selectAll("bar").data(percents_no_dis);
+	stateVis.selectAll("bar").data(percents_no_dis)
 		.enter().append("rect")
 			.attr("class", "bar")
 			.attr("x", function(d, i) { return x(i) + shiftRight; })
