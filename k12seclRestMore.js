@@ -111,6 +111,13 @@ var projection = d3.geo.albersUsa()
 
 var path = d3.geo.path().projection(projection);
 
+// load data
+// queue()
+// 	.defer(d3.json, "data/us-named.json")
+// 	.defer(d3.csv, "data/original-data.csv")
+// 	.await(ready);
+
+// function ready(error, us) {
 d3.json("data/us-named.json", function(error, us) {
 	
 	var usMap = topojson.feature(us, us.objects.states).features;
@@ -130,41 +137,61 @@ d3.json("data/us-named.json", function(error, us) {
 
 });
 
-// bar graphs
-d3.csv("data/original-data.csv", function(error, data) {
-
-	var state = "CO"; // get data for particular state
-	createStateVis(data, state);
+// initial bar graph
+var state = "CO"; // get data for particular state
+createStateVis(state);
 
 
-	// step 4. link map with bar graphs
-	
-	// step 5. decorate 
-	// - title = state name
-	// - bar graph = total number of occurrences
-	// - adjust tooltip to match number of lines + tiny triangle
-	// - change fonts
-	
-	// step 6. additional information: click on a bar to see additional information about that city rel to state
+function clicked(d) {
 
+	// change state color
+	d3.select(".active").classed("active", false);
+  	d3.select(this).classed("active", true);
 
-});
+  	// remove old bars/y-axis/legend
+  	stateVis.selectAll("rect")
+  		.transition()
+  		.duration(100)
+  		.remove();
+  	stateVis.selectAll(".y.axis")
+  		.transition()
+  		.duration(100)
+  		.remove();
 
-// get data for a particular state
-function getStateData(data, state) {
+  	// update
+  	var state = d.properties.code;
+  	createStateVis(state);
 
-	var alldata = [];
-
-	data.forEach(function(d) {
-		if (d.State == state) {
-			alldata.push(d);
-		}
-	});
-
-	return alldata;
 }
 
-// get data for particular punishment
+
+// create all three bar graphs
+function createStateVis(state) {
+
+	// initialize
+	var mech_restraints; var phys_restraints; var seclusions;
+	var pathname = "data/" + state + ".csv";
+	
+	d3.csv(pathname, function(error, stateData) {
+		// get punishment data
+		mech_restraints = getSeclRest(stateData, "mech");
+		phys_restraints = getSeclRest(stateData, "phys");
+		seclusions = getSeclRest(stateData, "seclusion");
+	
+		// make bar graphs
+		makeBarGraph(mech_restraints, 0);
+		makeBarGraph(phys_restraints, 1);
+		makeBarGraph(seclusions, 2);
+	});
+
+	// make legend
+	makeLegend();
+
+
+}
+
+
+// get punishment data
 function getSeclRest(data, punishment_type) {
 	
 	var alldata = [];
@@ -212,6 +239,7 @@ function getSeclRest(data, punishment_type) {
 	return alldata;	
 }
 
+// make bar graph
 function makeBarGraph(data, plotNum) {
 
 	// data
@@ -236,10 +264,6 @@ function makeBarGraph(data, plotNum) {
 	percents_no_dis = percents_no_dis.slice(0, 425);
 	////////////////////////////////////////////
 	////////////////////////////////////////////
-
-	// for legend
-	var colors = ["red", "gold"];
-	var labels = ["Disabled", "Not Disabled"];
 
 	if (plotNum == 0) {
 		var x = x0; var y = y0;
@@ -292,14 +316,17 @@ function makeBarGraph(data, plotNum) {
 			.attr("y", 5)
 			.attr("dy", ".71em")
 			.style("text-anchor", "end")
-			.text(label);
+			.text(label)
+		.transition()
+			.delay(100)
+			.duration(100);
 
 	// append bars for students with disabilities
 	stateVis.selectAll("bar")
 			.data(percents_dis)
 		.enter().append("rect")
 			.attr("class", "bar")
-			.attr("x", function(d, i) { return x(i)+shiftRight+2; })
+			.attr("x", function(d, i) { return x(i)+shiftRight; })
 			.attr("width", x.rangeBand())
 			.attr("y", function(d) { return y(d); })
 			.attr("height", function(d) { return thisHeight - y(d); })
@@ -307,7 +334,7 @@ function makeBarGraph(data, plotNum) {
 				div.transition()
 					.duration(200)
 					.style("opacity", 0.9);
-				div.html(keys[i] + "<br/> <font color='red'>" + percents_dis[i].toFixed(2) + "% </font>")
+				div.html(keys[i] + "<br/> <font color='RoyalBlue'>" + percents_dis[i].toFixed(2) + "% </font>")
 					.style("left", (d3.event.pageX - 37.5) + "px")
 					.style("top", (d3.event.pageY - 60) + "px");
 			})
@@ -315,7 +342,10 @@ function makeBarGraph(data, plotNum) {
 				div.transition()
 					.duration(500)
 					.style("opacity", 0);
-			});
+			})
+			.transition()
+				.delay(function(d,i) { return i*20; } )
+				.duration(500);
 
 	// append bars for students without disabilities
 	stateVis.selectAll("bar")
@@ -329,11 +359,11 @@ function makeBarGraph(data, plotNum) {
 			.style("fill", "gold")
 			.style("opacity", 0.75)
 			.on("mouseover", function(d, i) {
-				d3.select(this).style("fill", "SkyBlue");
+				d3.select(this).style("fill", "purple");
 				div.transition()
 					.duration(200)
 					.style("opacity", 0.9);
-				div.html(keys[i] + "<br/> <font color='red'>" + percents_no_dis[i].toFixed(2) + "% </font>")
+				div.html(keys[i] + "<br/> <font color='purple'>" + percents_no_dis[i].toFixed(2) + "% </font>")
 					.style("left", (d3.event.pageX - 37.5) + "px")
 					.style("top", (d3.event.pageY - 60) + "px");
 			})
@@ -343,7 +373,19 @@ function makeBarGraph(data, plotNum) {
 				div.transition()
 					.duration(500)
 					.style("opacity", 0);
-			});
+			})
+			.transition()
+				.delay(function(d,i) { return i*20; })
+				.duration(50);
+}
+
+// make legend
+
+function makeLegend() {
+
+	// initialize
+	var colors = ["red", "gold"];
+	var labels = ["Disabled", "Not Disabled"];
 
 	// make legend
 	var legend = stateVis.selectAll("legend")
@@ -367,22 +409,5 @@ function makeBarGraph(data, plotNum) {
 		.text(function(d, i) { return labels[i]; });
 }
 
-function createStateVis(data, state) {
-	var stateData = getStateData(data, state);
-	
-	// get data for punishments
-	mech_restraints = getSeclRest(stateData, "mech");
-	phys_restraints = getSeclRest(stateData, "phys");
-	seclusions = getSeclRest(stateData, "seclusion");
-	
-	// make bar graphs
-	makeBarGraph(mech_restraints, 0);
-	makeBarGraph(phys_restraints, 1);
-	makeBarGraph(seclusions, 2);
-}
 
-function clicked(d) {
-	d3.select(".active").classed("active", false);
-  	d3.select(this).classed("active", true);
-}
 
