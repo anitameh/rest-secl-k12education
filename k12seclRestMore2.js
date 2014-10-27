@@ -1,6 +1,7 @@
 /**
  * @author: Anita Mehrotra
  * @date: October 14, 2014
+ * @version: 2.0
  */
 
 var margin = {
@@ -16,10 +17,10 @@ var width = 750,
 
 // create svg elements for each sub-visualization
 var stateVisWidth = 610;
-var stateVisHeight = 600;
+var stateVisHeight = 600/3;
 
 var subWidth = stateVisWidth - 140,
-	subHeight = (stateVisHeight - margin.top)/3.5;
+	subHeight = stateVisHeight - 30;
 
 // canvas
 var canvas = d3.select("#vis").append("svg").attr({
@@ -32,11 +33,20 @@ var svg = canvas.append("g").attr({
 	transform: "translate(" + margin.left + "," + margin.top + ")"
 });
 
-var stateVis = d3.select("#stateVis").append("svg").attr({
+var stateVis0 = d3.select("#stateVis").append("svg").attr({
 	width: stateVisWidth,
 	height: stateVisHeight
 });
 
+var stateVis1 = d3.select("#stateVis").append("svg").attr({
+	width: stateVisWidth,
+	height: stateVisHeight
+});
+
+var stateVis2 = d3.select("#stateVis").append("svg").attr({
+	width: stateVisWidth,
+	height: stateVisHeight
+});
 
 // axes
 var shiftRight = 50;
@@ -64,7 +74,7 @@ var x1 = d3.scale.ordinal()
 	.rangeRoundBands( [0, subWidth], .1 );
 
 var y1 = d3.scale.linear()
-	.range( [50 + 2*subHeight, 50 + subHeight] );
+	.range( [subHeight, 0] );
 
 var xAxis1 = d3.svg.axis()
 	.scale(x1)
@@ -83,7 +93,7 @@ var x2 = d3.scale.ordinal()
 	.rangeRoundBands( [0, subWidth], .1 );
 
 var y2 = d3.scale.linear()
-	.range( [100 + 3*subHeight, 100 + 2*subHeight] );
+	.range( [subHeight, 0] );
 
 var xAxis2 = d3.svg.axis()
 	.scale(x2)
@@ -117,6 +127,10 @@ var path = d3.geo.path().projection(projection);
 // 	.defer(d3.csv, "data/original-data.csv")
 // 	.await(ready);
 
+// default view
+// var state = "CO";
+// createStateVis(state);
+
 // function ready(error, us) {
 d3.json("data/us-named.json", function(error, us) {
 	
@@ -128,7 +142,7 @@ d3.json("data/us-named.json", function(error, us) {
 			.data(usMap)
 		.enter().append("path")
 			.attr("d", path)
-			.on("click", clicked);
+			.on("click", update);
 
 	svg.append("g").append("path")
 		.datum(topojson.mesh(us, us.objects.states, function(a,b) { return a !== b; }))	
@@ -137,75 +151,53 @@ d3.json("data/us-named.json", function(error, us) {
 
 });
 
-// initial bar graph
-var state = "CO"; // get data for particular state
-createStateVis(state);
 
-
-function clicked(d) {
+function update(d) {
 
 	// change state color
 	d3.select(".active").classed("active", false);
   	d3.select(this).classed("active", true);
 
-  	// remove old bars/y-axis/legend
-  	stateVis.selectAll("rect")
+  	// remove old legend
+	stateVis0.selectAll("legend")
+		.remove();
+
+	// remove old y-axis
+  	stateVis0.selectAll(".y.axis")
   		.transition()
   		.duration(75)
   		.remove();
 
-  	// bars_dis.exit().transition()
-  	// 	.delay(function(d,i) { return i*20; })
-  	// 	.duration(300)
-  	// 	// .attr("x", function(d,i) { return -400; })
-  	// 	// .attr("y", function(d,i) { return -400; })
-  	// 	.remove();
-  	
-  	// bars_no_dis.exit().transition()
-  	// 	.delay(function(d,i) { return i*20; })
-  	// 	.duration(300)
-  	// 	// .attr("x", function(d,i) { return -400; })
-  	// 	// .attr("y", function(d,i) { return -400; })
-  	// 	.remove();
-
-  	stateVis.selectAll(".y.axis")
+  	stateVis1.selectAll(".y.axis")
   		.transition()
   		.duration(75)
   		.remove();
 
-  	stateVis.selectAll("legend")
+  	stateVis2.selectAll(".y.axis")
   		.transition()
   		.duration(75)
   		.remove();
 
-  	// update
+  	// draw new state data
   	var state = d.properties.code;
-  	createStateVis(state);
-
-}
-
-
-// create all three bar graphs
-function createStateVis(state) {
-
-	// initialize
-	var mech_restraints, phys_restraints, seclusions;
+  	var mech_restraints, phys_restraints, seclusions;
 	var pathname = "data/" + state + ".csv";
-	
-	d3.csv(pathname, function(error, stateData) {
+
+  	d3.csv(pathname, function(error, stateData) {
+
 		// get punishment data
 		mech_restraints = getSeclRest(stateData, "mech");
 		phys_restraints = getSeclRest(stateData, "phys");
 		seclusions = getSeclRest(stateData, "seclusion");
-	
-		// make bar graphs
+
 		makeBarGraph(mech_restraints, 0);
 		makeBarGraph(phys_restraints, 1);
 		makeBarGraph(seclusions, 2);
+
 	});
 
-	// make legend
-	makeLegend();
+  	// make legend
+	makeLegend(stateVis0);
 
 
 }
@@ -259,80 +251,75 @@ function getSeclRest(data, punishment_type) {
 	return alldata;	
 }
 
-// make bar graph
 function makeBarGraph(data, plotNum) {
-
-	// data
-	var keys = d3.keys(data);
-	var vals = d3.values(data);
-
-	var vals_dis = [];
-	var vals_no_dis = [];
-
-	vals.forEach(function(d) {
-		vals_dis.push( d[0] );
-		vals_no_dis.push( d[1] );
-	});
-
-	var percents_dis = _.map(vals_dis, function(num) { return num*100; });
-	var percents_no_dis = _.map(vals_no_dis, function(num) { return num*100; });
-
-	////////////////////////////////////////////
-	////////////////////////////////////////////
-	percents_dis = percents_dis.slice(0,425);
-	////////////////// THIS /////////////////////
-	percents_no_dis = percents_no_dis.slice(0, 425);
-	////////////////////////////////////////////
-	////////////////////////////////////////////
 
 	if (plotNum == 0) {
 		var x = x0; var y = y0;
 		var xAxis = xAxis0; 
 		var yAxis = yAxis0;
-		var thisHeight = subHeight;
+		var stateVis = stateVis0;
 		var label = "Mechanical Restraints";
 	}
 	else if (plotNum == 1) {
 		var x = x1; var y = y1;
 		var xAxis = xAxis1;
 		var yAxis = yAxis1;
-		var thisHeight = 50 + 2*subHeight;
+		var stateVis = stateVis1;
 		var label = "Physical Restraints";
 	}
 	else {
 		var x = x2; var y = y2;
 		var xAxis = xAxis2;
 		var yAxis = yAxis2;
-		var thisHeight = 100 + 3*subHeight;
+		var stateVis = stateVis2;
 		label = "Seclusions";
 	}
-	
+
+	// get data
+	var keys = d3.keys(data);
+	var vals = d3.values(data);
+
+	var vals_dis = [];
+	var vals_no_dis = [];
+	vals.forEach(function(d) {
+		vals_dis.push( d[0] );
+		vals_no_dis.push( d[1] );
+	});
+
+
+	var percents_dis = _.map(vals_dis, function(num) { return num*100; });
+	var percents_no_dis = _.map(vals_no_dis, function(num) { return num*100; });
+
+	if (plotNum == 1) {
+		console.log("phys # of data points: "+ percents_dis.length);
+	}
+
 	// set up domains
 	x.domain(percents_dis.map( function(d, i) { return i; } ));
 
+	// var max_dis = Math.ceil(d3.max(vals_dis));
+	// var max_no_dis = Math.ceil(d3.max(vals_no_dis));
 	var max_dis = Math.ceil(d3.max(percents_dis));
 	var max_no_dis = Math.ceil(d3.max(percents_no_dis));
-	if (max_dis > max_no_dis) {
-		y.domain( [0, max_dis] );
-	}
-	else {
-		y.domain( [0, max_no_dis] );
-	}
+	y.domain( [0, max_dis+max_no_dis] )
+
+	var color = d3.scale.ordinal()
+		.range(["red", "gold"]);
 
 	// append xAxis
 	stateVis.append("g")
 		.attr("class", "x axis")
-		.attr("transform", "translate(" + shiftRight + "," + thisHeight + ")")
+		.attr("transform", "translate(" + shiftRight + "," + subHeight + ")")
 		.call(xAxis);
 
 	// append yAxis
 	stateVis.append("g")
 			.attr("class", "y axis")
-			.attr("transform", "translate(" + shiftRight + ",0)")
+			.attr("transform", "translate(" + shiftRight + "," + 5 +")")
 			.call(yAxis)
 		.append("text")
 			.attr("transform", "rotate(-90)")
-			.attr("x", -(50 + subHeight)*plotNum)
+			.attr("x", -2)
 			.attr("y", 5)
 			.attr("dy", ".71em")
 			.style("text-anchor", "end")
@@ -341,67 +328,51 @@ function makeBarGraph(data, plotNum) {
 			.delay(100)
 			.duration(100);
 
-	// append bars for students with disabilities
-	// bars_dis = stateVis.selectAll("bar").data(percents_dis);
-	stateVis.selectAll("bar").data(percents_dis)
-		.enter().append("rect")
-			.attr("class", "bar")
+	// students w disabilities
+	var bars_dis = stateVis.selectAll("rect.bar")
+		.data(percents_dis);
+
+	// enter
+	bars_dis.enter()
+		.append("svg:rect")
+		.attr("class", "bar")
+		.on("mouseover", function(d, i) {
+			div.transition()
+				.duration(200)
+				.style("opacity", 0.9);
+			div.html(keys[i] + "<br/> <font color='RoyalBlue'>" + percents_dis[i].toFixed(2) + "% </font>")
+				.style("left", (d3.event.pageX - 37.5) + "px")
+				.style("top", (d3.event.pageY - 60) + "px");
+		})
+		.on("mouseout", function(d) {
+			div.transition()
+				.duration(500)
+				.style("opacity", 0);
+		});
+
+	// exit
+	bars_dis.exit()
+		.transition()
+		.duration(300)
+		.ease("exp")
+			.attr("width", 0)
+			.remove();
+
+	// draw
+	bars_dis
+		.transition()
+		.duration(500)
+		.ease("quad")
 			.attr("x", function(d, i) { return x(i)+shiftRight; })
 			.attr("width", x.rangeBand())
 			.attr("y", function(d) { return y(d); })
-			.attr("height", function(d) { return thisHeight - y(d); })
-			.on("mouseover", function(d, i) {
-				div.transition()
-					.duration(200)
-					.style("opacity", 0.9);
-				div.html(keys[i] + "<br/> <font color='RoyalBlue'>" + percents_dis[i].toFixed(2) + "% </font>")
-					.style("left", (d3.event.pageX - 37.5) + "px")
-					.style("top", (d3.event.pageY - 60) + "px");
-			})
-			.on("mouseout", function(d) {
-				div.transition()
-					.duration(500)
-					.style("opacity", 0);
-			})
-			.transition()
-				.delay(function(d,i) { return i*20; } )
-				.duration(500);
+			.attr("height", function(d) { return subHeight - y(d); });
 
-	// append bars for students without disabilities
-	// bars_no_dis = stateVis.selectAll("bar").data(percents_no_dis);
-	stateVis.selectAll("bar").data(percents_no_dis)
-		.enter().append("rect")
-			.attr("class", "bar")
-			.attr("x", function(d, i) { return x(i) + shiftRight; })
-			.attr("width", x.rangeBand())
-			.attr("y", function(d) { return y(d); })
-			.attr("height", function(d) { return thisHeight - y(d); })
-			.style("fill", "gold")
-			.style("opacity", 0.75)
-			.on("mouseover", function(d, i) {
-				d3.select(this).style("fill", "purple");
-				div.transition()
-					.duration(200)
-					.style("opacity", 0.9);
-				div.html(keys[i] + "<br/> <font color='purple'>" + percents_no_dis[i].toFixed(2) + "% </font>")
-					.style("left", (d3.event.pageX - 37.5) + "px")
-					.style("top", (d3.event.pageY - 60) + "px");
-			})
-			.on("mouseout", function(d) {
-				d3.select(this).style("fill", "gold");
-				d3.select(this).style("opacity", 0.75);
-				div.transition()
-					.duration(500)
-					.style("opacity", 0);
-			})
-			.transition()
-				.delay(function(d,i) { return i*20; })
-				.duration(50);
+	
 }
 
-// make legend
 
-function makeLegend() {
+function makeLegend(stateVis) {
 
 	// initialize
 	var colors = ["red", "gold"];
