@@ -21,16 +21,18 @@
             }
 
             /* table */
-            /*tr, th {
+/*            tr, th {
                 position: relative;
                 border: 1px solid black;
+            }*/
+
+            th, td {
+                padding: 1px 4px;
+                /*border: 1px solid black;*/
+
             }
 
-            table, th, td {
-                border: 1px;
-            }
-
-            td {
+/*            td {
                 text-align: center;
                 padding: 3px;
             }
@@ -52,7 +54,7 @@
             #state-borders {
                 fill: none;
                 stroke: #fff;
-                stroke-width: 3px;
+                stroke-width: 1.5px;
                 stroke-linejoin: round;
                 stroke-linecap: round;
                 pointer-events: none;
@@ -63,8 +65,10 @@
 
         </style>
 
-        <!-- //<script type="text/javascript"></script> -->
         <script src="k12seclRest_final.js"></script>
+        <table>
+            <tr><td><div id="vis"></div></td><td><div id="stateVis"></div></td></tr>
+        </table>
 
     </body>
 </html>
