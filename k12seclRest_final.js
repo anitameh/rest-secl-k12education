@@ -51,6 +51,8 @@ function clicked(d) {
 	d3.select(this).classed("active", true)
 
 	// remove old table
+	d3.select("body").selectAll("table")
+		.remove();
 	
 	// get state data
 	var state = d.properties.code;
@@ -66,7 +68,6 @@ function clicked(d) {
 function getSeclRest(data) {
 	var alldata = [];
 	var j = 0;
-	console.log(j);
 	data.forEach(function(d) {
 		var TE = parseInt(d.total_enrollment);
 		var mech_dis = ( parseInt(d.idea_mech_restraints) + parseInt(d.section_504_mech_restraints) )/TE;
@@ -88,7 +89,6 @@ function getSeclRest(data) {
 			if (secl_no_dis != 0) { secl_no_dis = parseFloat(secl_no_dis).toFixed(3) };
 
 			alldata[j] = [d.School_name, TE, mech_dis, mech_no_dis, phys_dis, phys_no_dis, secl_dis, secl_no_dis];
-			console.log(j);
 			j = j+1; 
 
 		}
@@ -97,22 +97,23 @@ function getSeclRest(data) {
 }
 
 function makeTable(data) {
-	var column_names = ["School", "Total Enrollment", "Mechanical, Disabled", "Physical, Disabled", "Seclusions, Disabled",
+	var columns = ["School", "Total Enrollment", "Mechanical, Disabled", "Physical, Disabled", "Seclusions, Disabled",
 						"Mechanical, Not Disabled", "Physical, Not Disabled", "Seclusions, Not Disabled"];
 	
-	// make table framework
+	// console.log(column_names);
 	var table = d3.select("body").append("table")
-			.style("margin-left", "50px")
+			.style("margin-left", "20px")
+			.style("margin-top", "-260px"),
 		thead = table.append("thead"),
 		tbody = table.append("tbody");
 
 	// append header row
 	thead.append("tr")
-		.select("th")
-		.data(column_names)
+		.selectAll("th")
+		.data(columns)
 		.enter()
 		.append("th")
-			.text(function(d) { return d; });
+			.text(function(column) { return column; })
 				.style("font-family", "Impact");
 
 	// create a row for each object in the data
@@ -121,18 +122,17 @@ function makeTable(data) {
 		.enter()
 		.append("tr");
 
-
 	// create a cell in each row for each column
 	var cells = rows.selectAll("td")
 		.data(function(row) {
-			return column_names.map(function(column, i) {
-				console.log("row[i]: " + row[i]);
-				return { column:column, value:row[i] };
+			return columns.map(function(column, i) {
+				return {column:column, value:row[i]};
 			});
 		})
 		.enter()
 		.append("td")
-		.attr("style", "font-family: sans-serif")
+		.style("font-family", "Tahoma")
+		.style("font-size", "9pt")
 			.html(function(d) { return d.value; });
 
 	return table;
