@@ -43,6 +43,12 @@ d3.json("data/us-named.json", function(error, us) {
 		.attr("id", "state-borders")
 		.attr("d", path);
 
+	// remove initial table
+	d3.select("body").selectAll("table")
+		.transition()
+		.duration(1)
+		.remove();
+
 });
 
 function clicked(d) {
@@ -85,16 +91,15 @@ function getSeclRest(data) {
 		var secl_dis = ( parseInt(d.idea_seclusion) + parseInt(d.section_504_seclusion) )/TE;
 		var secl_no_dis = parseInt(d.no_dis_seclusion)/TE;
 
-		if ( (mech_dis != 0 && mech_dis <= 1) || (mech_no_dis != 0 && mech_no_dis <= 1) &&
-			 (phys_dis != 0 && phys_dis <= 1) || (phys_no_dis != 0 && phys_no_dis <= 1) &&
-			 (secl_dis != 0 && secl_dis <= 1) || (secl_no_dis != 0 && secl_no_dis <= 1) ) {
+		if ( (mech_dis != 0 || mech_no_dis != 0 || phys_dis != 0 || phys_no_dis != 0 || secl_dis != 0 || secl_no_dis != 0) && 
+			(mech_dis <= 1 && mech_no_dis <= 1 && phys_dis <= 1 && phys_no_dis <= 1 && secl_dis <= 1 && secl_no_dis <= 1) ) {
 
-			if (mech_dis != 0) { mech_dis = parseFloat(mech_dis).toFixed(3) };
-			if (mech_no_dis != 0) { mech_no_dis = parseFloat(mech_no_dis).toFixed(3) };
-			if (phys_dis != 0) { phys_dis = parseFloat(phys_dis).toFixed(3) };
-			if (phys_no_dis != 0) { phys_no_dis = parseFloat(phys_no_dis).toFixed(3) };
-			if (secl_dis != 0) { secl_dis = parseFloat(secl_dis).toFixed(3) };
-			if (secl_no_dis != 0) { secl_no_dis = parseFloat(secl_no_dis).toFixed(3) };
+			if (mech_dis != 0) { mech_dis = parseFloat(mech_dis).toFixed(4) };
+			if (mech_no_dis != 0) { mech_no_dis = parseFloat(mech_no_dis).toFixed(4) };
+			if (phys_dis != 0) { phys_dis = parseFloat(phys_dis).toFixed(4) };
+			if (phys_no_dis != 0) { phys_no_dis = parseFloat(phys_no_dis).toFixed(4) };
+			if (secl_dis != 0) { secl_dis = parseFloat(secl_dis).toFixed(4) };
+			if (secl_no_dis != 0) { secl_no_dis = parseFloat(secl_no_dis).toFixed(4) };
 
 			alldata[j] = [d.School_name, TE, mech_dis, mech_no_dis, phys_dis, phys_no_dis, secl_dis, secl_no_dis];
 			j = j+1; 
@@ -119,18 +124,25 @@ function makeTable(data) {
 	// console.log(column_names);
 	var table = d3.select("body").append("table")
 			.style("margin-left", "20px")
+			.style("margin-right", "100px")
 			.style("margin-top", "-260px"),
 		thead = table.append("thead"),
 		tbody = table.append("tbody");
 
 	// append header row and sort
+	var k = 0;
 	thead.append("tr")
 		.selectAll("th")
 		.data(columns)
 		.enter().append("th")
 			.text(function(column) { return column; })
 				.style("font-family", "Impact")
+		.on("mouseover", function(d, i, j) {
+			// initial hover should change the cursor
+			if (k == 0) { d3.selectAll("th").style("cursor", "s-resize") }; 
+		})
 		.on("click", function(d, i) {
+			k = 1;
 			var sort;
 			if (i == 0) {
 				// school name
