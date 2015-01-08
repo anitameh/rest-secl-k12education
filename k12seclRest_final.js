@@ -28,7 +28,7 @@ var path = d3.geo.path().projection(projection);
 
 d3.json("data/us-named.json", function(error, us) {
 	
-	var usMap = topojson.feature(us, us.objects .states).features;
+	var usMap = topojson.feature(us, us.objects.states).features;
 
 	svg.append("g")
 			.attr("id", "states")
