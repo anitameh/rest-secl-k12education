@@ -11,8 +11,8 @@ var margin = {
 	left: 50
 };
 
-var width = 850,
-	height = 750;
+var width = 960,
+	height = 550;
 
 var svg = d3.select("body").append("svg")
 			.attr("width", width)
@@ -21,11 +21,13 @@ var svg = d3.select("body").append("svg")
 
 // create US Map
 var projection = d3.geo.albersUsa()
-	.scale(900)
-	.translate([width/2, height-550]);
+	.scale(600)
+	.translate([width/4, height/4]);
 
 var path = d3.geo.path().projection(projection);
 
+
+// load data and make table
 d3.json("data/us-named.json", function(error, us) {
 	
 	var usMap = topojson.feature(us, us.objects.states).features;
@@ -51,6 +53,9 @@ d3.json("data/us-named.json", function(error, us) {
 
 });
 
+
+
+// FUNCTIONS
 function clicked(d) {
 	// change state color
 	d3.select(".active").classed("active", false)
@@ -79,6 +84,9 @@ function clicked(d) {
 	});
 }
 
+
+
+// get and reformat data
 function getSeclRest(data) {
 	var alldata = [];
 	var j = 0;
@@ -109,6 +117,9 @@ function getSeclRest(data) {
 	return alldata;
 }
 
+
+
+// create sortable table for selected csv
 function makeTable(data) {
 	var columns = ["School", "Total Enrollment", "Mechanical, Disabled", "Physical, Disabled", "Seclusions, Disabled",
 						"Mechanical, Not Disabled", "Physical, Not Disabled", "Seclusions, Not Disabled"];
@@ -281,6 +292,8 @@ function makeTable(data) {
 	return table;
 
 }
+
+
 
 var sort_school_name_ascend = function(a, b) { return d3.ascending(a[0], b[0]); };
 var sort_school_name_descend = function(a, b) { return d3.descending(a[0], b[0]); };
