@@ -50,12 +50,6 @@ d3.json('data/us-named.json', function(error, usa) {
 		.attr('id', 'state-borders')
 		.attr('d', path);
 
-	// remove the initial little empty table
-	d3.select('body').selectAll('table')
-		.transition()
-		.duration(1)
-		.remove();
-
 });
 
 document.querySelector('#search-button').addEventListener('click', changeInput);
@@ -78,7 +72,6 @@ function chooseState(d) {
 	d3.select('body').selectAll('h1').remove();
 	d3.select('body').selectAll('h2').remove();
 
-
 	// update viz
 	var state = d.properties.code;
 	var pathname = 'data/' + state + '.csv';
@@ -90,7 +83,6 @@ function chooseState(d) {
 		var stateData = computeStateMetrics(data);
 		buildTableForSchool( stateData, query );
 	});
-
 }
 
 
@@ -186,8 +178,7 @@ function buildTable(data) {
 	if (data.length != 0) {
 		
 		// init table
-		var table = d3.select('.table-container').append('table')
-				.style('margin-left', String(width/4 + 260)+ 'px')
+		var table = d3.select('.table-container').append('table'),
 			thead = table.append('thead'),
 			tbody = table.append('tbody');
 
