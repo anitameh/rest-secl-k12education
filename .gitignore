@@ -2,3 +2,11 @@
 *.docx
 *.ipynb
 .ipynb_checkpoints/*
+originalStackedBars.html
+k12seclRest_final*
+k12seclRest*
+k12seclRestMore*
+k12seclRestMore2*
+reformatData*
+stackedBars*
+test-zoom-click*
