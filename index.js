@@ -217,7 +217,7 @@ function buildTableForSchool( stateData, schoolQuery ) {
 	// remove existing table
 	d3.select('body').selectAll('table') 
 		.transition()
-		.duration(50)
+		.duration(30)
 		.remove();
 
 	// check: is school query entered?
