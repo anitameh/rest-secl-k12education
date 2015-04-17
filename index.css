@@ -35,7 +35,7 @@ h1 {
 
 h2 {
     position: absolute;
-    font-family: Impact;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
     font-size: 15pt;
     top: 130px;
     left: 510px;
@@ -43,22 +43,31 @@ h2 {
 }
 
 /* table */
-
-table, th, td {
+table, th, td, tr {
     padding: 1px 4px;
-    border: 1px solid black;
     overflow: scroll;
-}
-
-th {
-    font-family: Impact;
+    border-collapse: collapse;
+    border-bottom: 3px solid white;
 }
 
 table {
-    border-collapse: collapse;
-    font-family: Tahoma;
-    font-size: 9pt;
+    font-family: Verdana;
+    font-size: 8pt;
     width: 400px;
+}
+
+th {
+    /*font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;*/
+    font-family: Impact;
+    font-size: 9pt;
+    /*font-weight: bold;*/
+    background-color: black;
+    color: LightSkyBlue;
+    /*opacity: 0.8;*/
+}
+
+td {
+    background-color: Gainsboro;
 }
 
 .table-container {
@@ -68,8 +77,8 @@ table {
 
 /* search box */
 #results {
-    font-family: Tahoma;
-    font-size: 9pt;
+    font-family: Verdana;
+    font-size: 8pt;
     position: relative;
     right: -500px;
     top: 30px;

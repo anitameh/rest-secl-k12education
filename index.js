@@ -61,48 +61,35 @@ document.querySelector('#reset-button').addEventListener('click', clearInput);
 // function: choose state
 function chooseState(d) {
 
-	document.querySelector('#search-box').value = '';
+	// clear search box if new state is selected & set query to undef
+	document.querySelector('#search-box').value = ''; 
 	query = undefined;
 
 	// change state color
 	d3.select('.active').classed('active', false);
 	d3.select(this).classed('active', true);
 
-	// remove old info
+	// remove old state name & "no data" msg
 	d3.select('body').selectAll('h1').remove();
 	d3.select('body').selectAll('h2').remove();
 
-	// update viz
+	// get updated state name
+	var actualStateName = d.properties.name;
+	d3.select('body').append('h1')
+		.style('opacity', 0) // before transition
+		.transition()
+			.delay(100)
+			.duration(750)
+			.style('opacity', 1)
+			.text( actualStateName ); // end of transition state
+
+	// create table
 	var state = d.properties.code;
 	var pathname = 'data/' + state + '.csv';
-	var currentStateTitle = d3.select('body').append('h1');
-	currentStateTitle.html(d.properties.name);
-
-	// load state data & compute metrics for table
 	d3.csv( pathname, function(error, data) {
-		var stateData = computeStateMetrics(data);
-		buildTableForSchool( stateData, query );
+		var stateData = computeStateMetrics(data); // compute metrics
+		buildTableForSchool( stateData, query ); // build table
 	});
-}
-
-
-// function: handle input in search box
-function changeInput(e) {
-	var text = document.querySelector('#search-box').value;
-    query = (text.trim()).toUpperCase();
-    // now that we have the query, change table to filter and only include query results
-    stateData = undefined;
-    buildTableForSchool( stateData, query );
-}
-
-
-// function: clears & displays entire state table
-function clearInput(e) {
-	document.querySelector('#search-box').value = ''; // delete text in search box
-	// show table for entire state
-	stateData = undefined;
-	query = undefined;
-	buildTableForSchool( stateData, query );
 }
 
 
@@ -111,19 +98,16 @@ function computeStateMetrics(data) {
 	// init
 	allData = [];
 	var j = 0;
+
 	data.forEach( function(d) {
-
-		var totalEnroll = parseInt( d.total_enrollment );
-
 		// get metrics
+		var totalEnroll = parseInt( d.total_enrollment );
 		var mechRestraints_idea = parseInt( d.idea_mech_restraints );
 		var mechRestraints_504 = parseInt( d.section_504_mech_restraints );
 		var mechRestraints_reg = parseInt( d.no_dis_mech_restraints );
-
 		var physRestraints_idea = parseInt( d.idea_phys_restraints );
 		var physRestraints_504 = parseInt( d.section_504_phys_restraints );
 		var physRestraints_reg = parseInt( d.no_dis_phys_restraints );
-
 		var seclusions_idea = parseInt( d.idea_seclusion );
 		var seclusions_504 = parseInt( d.section_504_seclusion );
 		var seclusions_reg = parseInt( d.no_dis_seclusion );
@@ -131,10 +115,8 @@ function computeStateMetrics(data) {
 		// compute percentages
 		var mechDisabled = (mechRestraints_idea + mechRestraints_504) / totalEnroll;
 		var mechRegular = mechRestraints_reg / totalEnroll;
-
 		var physDisabled = (physRestraints_idea + physRestraints_504) / totalEnroll;
 		var physRegular = physRestraints_reg / totalEnroll;
-
 		var seclDisabled = (seclusions_idea + seclusions_504) / totalEnroll;
 		var seclRegular = seclusions_reg / totalEnroll;
 
@@ -168,46 +150,7 @@ function computeStateMetrics(data) {
 			j = j+1;
 		}
 	});
-
 	return allData;	
-}
-
-
-// function: build table
-function buildTable(data) {
-	if (data.length != 0) {
-		
-		// init table
-		var table = d3.select('.table-container').append('table'),
-			thead = table.append('thead'),
-			tbody = table.append('tbody');
-
-		// append headers
-		thead.append('tr')
-			.selectAll('th')
-			.data(columnNames)
-			.enter().append('th')
-				.text( function(name) { return name; } );
-
-		// create rows of table
-		var rows = tbody.selectAll('tr')
-			.data(data)
-			.enter().append('tr');
-
-		// create cells of row
-		var cells = rows.selectAll('td')
-			.data( function( row ) {
-				return columnNames.map( function(name, i) {
-					return {name:name, value:row[i]};
-				});
-			})
-			.enter().append('td')
-				.html(function(d) { return d.value; });
-	}
-	else {
-		var noDataMessage = d3.select('body').append('h2');
-		noDataMessage.html( 'No data to display. Select a different state or school.' );
-	}
 }
 
 
@@ -215,64 +158,55 @@ function buildTable(data) {
 function buildTableForSchool( stateData, schoolQuery ) {
 
 	// remove existing table
-	d3.select('body').selectAll('table') 
-		.transition()
-		.duration(30)
-		.remove();
+	d3.select('body').selectAll('table').remove();
 
-	// check: is school query entered?
 	if ( String(schoolQuery) === 'undefined' ) {
-
 		if ( String(stateData) === 'undefined' ) {
-			// get state name + it's data
+			// If schoolQuery and stateData undefined, 
+			// 	get state name and show whole state's data
 			var stateName = d3.select('body').select('h1')[0][0]['innerText'];
 			var stateAbbreviation = abbrState( stateName, 'abbr');
 			var pathname = 'data/' + stateAbbreviation + '.csv';
-			
 			d3.csv( pathname, function(error, data) {
 				var computedStateData = computeStateMetrics( data );
 				buildTable( computedStateData );
 			}); 
 		}
 		else {
-			// show whole state
+			// If schoolQuery undefined and stateData defined, 
+			// 	show whole state's data
 			buildTable( stateData );
 		}
-		
 	}
 	else {
 		if ( String(stateData) === 'undefined' ) {
-			// get state name + it's data
 			var stateOnScreen = d3.select('body').select('h1')[0][0];
-
 			if (stateOnScreen === null) {
+				// If schoolQuery defined, stateData undefined AND no state selected,
+				//  show msg to select state first
 				var noStateMessage = d3.select('body').append('h2');
 				noStateMessage.html( 'Please select a state first!' );
 			}
 			else {
+				// If schoolQuery defined and stateData undefined but state selected,
+				// 	show school's data for that state
 				var stateName = stateOnScreen['innerText'];
 				var stateAbbreviation = abbrState( stateName, 'abbr');
 				var pathname = 'data/' + stateAbbreviation + '.csv';
-				
 				// filter by school
 				d3.csv( pathname, function(error, data) {
 					var schoolIndex = [],
 						schoolsData = [];
-
-					// get school names
 					schools = getSchoolNames( data ); 
-					
 					schools.forEach( function(d, i) {
 						if (d.search( query ) != -1) {
 							schoolIndex.push( i );
 						}
 					});
-
 					// recreate a smaller version of stateData for schools & build table
 					schoolIndex.forEach( function(d, j) {
 						schoolsData[j] = data[ schoolIndex[j] ];
 					});
-
 					// build table
 					var computedSchoolsData = computeStateMetrics( schoolsData );
 					buildTable( computedSchoolsData );
@@ -280,26 +214,22 @@ function buildTableForSchool( stateData, schoolQuery ) {
 			}
 		}
 		else {
-			// filter by school
+			// If schoolQuery and stateData defined, 
+			//	show school's data for that state
 			d3.csv( pathname, function(error, data) {
-
 				var schoolIndex = [],
 					schoolsData = [];
-
 				// get school names
 				schools = getSchoolNames( data ); 
-				
 				schools.forEach( function(d, i) {
 					if (d.search( query ) != -1) {
 						schoolIndex.push( i );
 					}
 				});
-
 				// recreate a smaller version of stateData for schools & build table
 				schoolIndex.forEach( function(d, j) {
 					schoolsData[j] = data[ schoolIndex[j] ];
 				});
-
 				// build table
 				var computedSchoolsData = computeStateMetrics( schoolsData );
 				buildTable( computedSchoolsData );
@@ -309,6 +239,63 @@ function buildTableForSchool( stateData, schoolQuery ) {
 	}
 }
 
+
+// function: build table
+function buildTable(data) {
+
+	if (data.length != 0) {
+		// If there's data, init table + headers + body
+		var table = d3.select('.table-container')
+				.style('overflow', 'scroll')
+				.append('table'),
+			thead = table.append('thead'),
+			tbody = table.append('tbody');
+
+		// rows 
+		// append names to header row
+		var theaders = thead.selectAll('th')
+			.data( columnNames )
+			.enter()
+			.append('th')
+				.text( function(eachcolumnName) { return eachcolumnName; });
+
+		// create rows of table
+		var rows = tbody.selectAll('tr')
+			.data(data)
+			.enter().append('tr');
+
+		// cells
+		// update cells of row with text
+		var cells = rows.selectAll('td')
+			.data( function( row ) {
+				return columnNames.map( function(name, i) {
+					return {name:name, value:row[i]};
+				});
+			})
+			.enter()
+			.append('td')
+				.text(function(d) { return d.value; });
+		// // animate (fade in)
+		// cells
+		// 	.style('opacity', 0)
+		// 	.transition()
+		// 		.delay(100)
+		// 		.duration(500)
+		// 		.style('opacity', 1);
+	}
+	else {
+		var noDataMessage = 'No data to display. Select a different state or school.';
+		d3.select('body').append('h2')
+			.style('opacity', 0)
+			.transition()
+				.delay(100)
+				.duration(750)
+				.style('opacity', 1)
+				.text( noDataMessage );
+	}
+}
+
+
 // function: get school names
 function getSchoolNames( data ) {
 	schools = [];
@@ -316,6 +303,26 @@ function getSchoolNames( data ) {
 		schools.push( d['School_name'] );
 	});
 	return schools;
+}
+
+
+// function: handle input in search box
+function changeInput(e) {
+	var text = document.querySelector('#search-box').value;
+    query = (text.trim()).toUpperCase();
+    // now that we have the query, change table to filter and only include query results
+    stateData = undefined;
+    buildTableForSchool( stateData, query );
+}
+
+
+// function: clears & displays entire state table
+function clearInput(e) {
+	document.querySelector('#search-box').value = ''; // delete text in search box
+	// show table for entire state
+	stateData = undefined;
+	query = undefined;
+	buildTableForSchool( stateData, query );
 }
 
 
