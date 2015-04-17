@@ -28,8 +28,10 @@ var path = d3.geo.path().projection(projection);
 // global vars
 var query,
 	schoolFlag = 0, 
-	columnNames = ['School', 'Total Enrollment', 'Mechanical, Disabled', 'Seclusions, Disabled', 
-		'Physical, Disabled', 'Mechanical, Not Disabled', 'Physical, Not Disabled', 'Seclusions, Not Disabled'];
+	columnNames = ['SCHOOL', 'TOTAL ENROLLED', 'MECH, DISABLED', 'SECL, DISABLED', 
+		'PHYS, DISABLED', 'MECH, NOT DISABLED', 'PHYS, NOT DISABLED', 'SECL, NOT DISABLED'];
+	// columnNames = ['School', 'Total Enrollment', 'Mechanical, Disabled', 'Seclusions, Disabled', 
+	// 	'Physical, Disabled', 'Mechanical, Not Disabled', 'Physical, Not Disabled', 'Seclusions, Not Disabled'];
 
 
 // load data and execute
@@ -43,7 +45,7 @@ d3.json('data/us-named.json', function(error, usa) {
 		.selectAll('path').data(usaMap)
 		.enter().append('path')
 			.attr('d', path)
-			.on('click', chooseState);
+			.on('click', onChooseState);
 
 	svg.append('g').append('path')
 		.datum(topojson.mesh(usa, usa.objects.states, function(a,b) { return a !== b; }))
@@ -52,14 +54,14 @@ d3.json('data/us-named.json', function(error, usa) {
 
 });
 
-document.querySelector('#search-button').addEventListener('click', changeInput);
-document.querySelector('#reset-button').addEventListener('click', clearInput);
+document.querySelector('#search-button').addEventListener('click', onChangeInput);
+document.querySelector('#reset-button').addEventListener('click', onClearInput);
 
 
 // FUNCTIONS
 
 // function: choose state
-function chooseState(d) {
+function onChooseState(d) {
 
 	// clear search box if new state is selected & set query to undef
 	document.querySelector('#search-box').value = ''; 
@@ -131,14 +133,12 @@ function computeStateMetrics(data) {
 			if (mechRegular != 0) {
 				mechRegular = parseFloat(mechRegular).toFixed(4);
 			}
-
 			if (physDisabled != 0) {
 				physDisabled = parseFloat(physDisabled).toFixed(4);
 			}
 			if (physRegular != 0) {
 				physRegular = parseFloat(physRegular).toFixed(4);
 			}
-
 			if (seclDisabled != 0) {
 				seclDisabled = parseFloat(seclDisabled).toFixed(4);
 			}
@@ -209,8 +209,7 @@ function buildTableForSchool( stateData, schoolQuery ) {
 					});
 					// build table
 					var computedSchoolsData = computeStateMetrics( schoolsData );
-					schoolFlag = 1;
-					buildTable( computedSchoolsData, schoolFlag );
+					buildTable( computedSchoolsData );
 				}); 
 			}
 		}
@@ -246,7 +245,6 @@ function buildTable(data) {
 	if (data.length != 0) {
 		// If there's data, init table + headers + body
 		var table = d3.select('.table-container')
-				.style('overflow', 'scroll')
 				.append('table'),
 			thead = table.append('thead'),
 			tbody = table.append('tbody');
@@ -275,7 +273,7 @@ function buildTable(data) {
 			.enter()
 			.append('td')
 				.text(function(d) { return d.value; });
-		// // animate (fade in)
+		// animate (fade in)
 		cells
 			.style('opacity', 0)
 			.transition()
@@ -307,7 +305,7 @@ function getSchoolNames( data ) {
 
 
 // function: handle input in search box
-function changeInput(e) {
+function onChangeInput(e) {
 	var text = document.querySelector('#search-box').value;
     query = (text.trim()).toUpperCase();
     // now that we have the query, change table to filter and only include query results
@@ -317,7 +315,7 @@ function changeInput(e) {
 
 
 // function: clears & displays entire state table
-function clearInput(e) {
+function onClearInput(e) {
 	document.querySelector('#search-box').value = ''; // delete text in search box
 	// show table for entire state
 	stateData = undefined;
