@@ -27,7 +27,7 @@ var path = d3.geo.path().projection(projection);
 
 // global vars
 var query,
-	flag = 0, 
+	schoolFlag = 0, 
 	columnNames = ['School', 'Total Enrollment', 'Mechanical, Disabled', 'Seclusions, Disabled', 
 		'Physical, Disabled', 'Mechanical, Not Disabled', 'Physical, Not Disabled', 'Seclusions, Not Disabled'];
 
@@ -154,7 +154,7 @@ function computeStateMetrics(data) {
 }
 
 
-// function: search for school
+// function: build table for school+state combo
 function buildTableForSchool( stateData, schoolQuery ) {
 
 	// remove existing table
@@ -209,7 +209,8 @@ function buildTableForSchool( stateData, schoolQuery ) {
 					});
 					// build table
 					var computedSchoolsData = computeStateMetrics( schoolsData );
-					buildTable( computedSchoolsData );
+					schoolFlag = 1;
+					buildTable( computedSchoolsData, schoolFlag );
 				}); 
 			}
 		}
@@ -233,7 +234,6 @@ function buildTableForSchool( stateData, schoolQuery ) {
 				// build table
 				var computedSchoolsData = computeStateMetrics( schoolsData );
 				buildTable( computedSchoolsData );
-				buildTable( computedStateData );
 			}); 
 		}
 	}
@@ -276,12 +276,12 @@ function buildTable(data) {
 			.append('td')
 				.text(function(d) { return d.value; });
 		// // animate (fade in)
-		// cells
-		// 	.style('opacity', 0)
-		// 	.transition()
-		// 		.delay(100)
-		// 		.duration(500)
-		// 		.style('opacity', 1);
+		cells
+			.style('opacity', 0)
+			.transition()
+				.delay(100)
+				.duration(500)
+				.style('opacity', 1);
 	}
 	else {
 		var noDataMessage = 'No data to display. Select a different state or school.';
