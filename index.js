@@ -1,6 +1,6 @@
 /**
  * @author: Anita Mehrotra
- * @date: March 26, 2015
+ * @date: May 7, 2015
  * @version: 4.0
 */
 
@@ -13,7 +13,7 @@ var margin = {
 };
 
 var width = 960,
-	height = 550;
+	height = 400;
 
 var svg = d3.select('body').append('svg')
 			.attr('width', width)
@@ -21,7 +21,7 @@ var svg = d3.select('body').append('svg')
 
 var projection = d3.geo.albersUsa()
 	.scale(600)
-	.translate([width/4, height/4]);
+	.translate([width/4, height/2]);
 
 var path = d3.geo.path().projection(projection);
 
@@ -30,9 +30,6 @@ var query,
 	schoolFlag = 0, 
 	columnNames = ['SCHOOL', 'TOTAL ENROLLED', 'MECH, DISABLED', 'SECL, DISABLED', 
 		'PHYS, DISABLED', 'MECH, NOT DISABLED', 'PHYS, NOT DISABLED', 'SECL, NOT DISABLED'];
-	// columnNames = ['School', 'Total Enrollment', 'Mechanical, Disabled', 'Seclusions, Disabled', 
-	// 	'Physical, Disabled', 'Mechanical, Not Disabled', 'Physical, Not Disabled', 'Seclusions, Not Disabled'];
-
 
 // load data and execute
 d3.json('data/us-named.json', function(error, usa) {
@@ -239,23 +236,41 @@ function buildTableForSchool( stateData, schoolQuery ) {
 }
 
 
+// function: build header
+function buildTableHeader() {
+	// create one row (header)
+	var displayColumnNames = ['School', '# Enrolled', 'Mechanical, Disabled', 'Seclusions, Disabled',
+						'Physical, Disabled', 'Mechanical, Not Disabled', 'Physical, Not Disabled',
+						'Seclusions, Not Disabled']
+
+	var body = document.body,
+		tableHeader = document.createElement('table');
+
+	tableHeader.style.width = '500px'; 
+	tableHeader.style.border = '1px solid black';
+	tableHeader.style.cssText = 'margin-top: -395px;';
+
+	var tableRow = tableHeader.insertRow();
+	for (var j=0; j<displayColumnNames.length; j++) {
+		var td = tableRow.insertCell()
+		td.appendChild(document.createTextNode(displayColumnNames[j]));
+		td.style.border = '1px solid white';
+		td.style.textAlign = 'center';
+	}
+	body.appendChild(tableHeader);
+}
+
 // function: build table
 function buildTable(data) {
 
 	if (data.length != 0) {
 		// If there's data, init table + headers + body
-		var table = d3.select('.table-container')
-				.append('table'),
-			thead = table.append('thead'),
-			tbody = table.append('tbody');
 
-		// rows 
-		// append names to header row
-		var theaders = thead.selectAll('th')
-			.data( columnNames )
-			.enter()
-			.append('th')
-				.text( function(eachcolumnName) { return eachcolumnName; });
+		buildTableHeader();
+
+		// create table
+		var table = d3.select('.table-container').append('table'),
+			tbody = table.append('tbody');
 
 		// create rows of table
 		var rows = tbody.selectAll('tr')
@@ -317,6 +332,8 @@ function onChangeInput(e) {
 // function: clears & displays entire state table
 function onClearInput(e) {
 	document.querySelector('#search-box').value = ''; // delete text in search box
+	// remove 'no data' message if it's there
+	d3.select('body').selectAll('h2').remove();
 	// show table for entire state
 	stateData = undefined;
 	query = undefined;
