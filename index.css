@@ -5,7 +5,7 @@
 
 /* map */
 #states {
-    fill: #333;
+    fill: Gainsboro;
 }
 
 #states .active {
@@ -27,18 +27,25 @@
 h1 {
     position: absolute;
     font-family: Impact;
-    top: 70px;
-    left: 510px;
+    top: 50px;
+    left: 180px;
     color: crimson;
 }
 
 h2 {
     position: absolute;
-    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-    font-size: 15pt;
-    top: 130px;
-    left: 510px;
-    color: purple;
+    font-family: Verdana, "Geneva", sans-serif;
+    font-size: 14pt;
+    top: 450px;
+    left: 180;
+    color: #333;
+    padding: 10px;
+}
+
+#stateselector {
+	padding: 10px;
+	font-family: Verdana, "Geneva", sans-serif;
+    font-size: 9pt;
 }
 
 /* table */
@@ -57,25 +64,18 @@ table {
     font-family: Verdana;
     font-size: 8pt;
     width: 500px;
+    margin-top: 10px;
     /*-webkit-opacity: 1 300ms; */
 }
 
-th {
-    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-    font-size: 8pt;
-    font-style: bold;
-    background-color: #333;
-    color: LightSkyBlue;
-}
-
 td {
-    /*background-color: Gainsboro;*/
-    background-color: #333;
-    color: white;
+    background-color: Gainsboro;
+    color: #333;
 }
 
 #table-container {
 	position: absolute;
+	width: 100%;
 }
 
 /* search box */
@@ -83,8 +83,8 @@ td {
     font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
     font-size: 9pt;
     position: relative;
-    right: -500px;
-    top: 30px;
+    left: 10px;
+    top: 400px;
 }
 
 #results #search-box {

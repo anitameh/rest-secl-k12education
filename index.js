@@ -21,7 +21,7 @@ var svg = d3.select('body').append('svg')
 
 var projection = d3.geo.albersUsa()
 	.scale(600)
-	.translate([width/4, height/2]);
+	.translate([width/4, 150]);
 
 var path = d3.geo.path().projection(projection);
 
@@ -248,7 +248,7 @@ function buildTableHeader() {
 
 	tableHeader.style.width = '500px'; 
 	tableHeader.style.border = '1px solid black';
-	tableHeader.style.cssText = 'margin-top: -395px;';
+	tableHeader.style.cssText = 'margin-top: -385px;';
 
 	var tableRow = tableHeader.insertRow();
 	for (var j=0; j<displayColumnNames.length; j++) {
