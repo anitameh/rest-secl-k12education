@@ -5,12 +5,12 @@
 
 /* map */
 #states {
-    fill: Gainsboro;
+    fill: lightslategray;
 }
 
 #states .active {
-    fill: red;
-    fill-opacity: 0.75;
+    fill: crimson;
+    fill-opacity: 0.9;
 }
 
 #state-borders {
@@ -28,24 +28,24 @@ h1 {
     position: absolute;
     font-family: Impact;
     top: 50px;
-    left: 180px;
-    color: crimson;
+    left: 160px;
+    color: #333;
 }
 
 h2 {
     position: absolute;
-    font-family: Verdana, "Geneva", sans-serif;
+    font-family: Impact;
     font-size: 14pt;
     top: 450px;
-    left: 180;
+    margin-left: 160;
     color: #333;
     padding: 10px;
 }
 
 #stateselector {
 	padding: 10px;
-	font-family: Verdana, "Geneva", sans-serif;
-    font-size: 9pt;
+	font-family: Georgia, serif;
+    font-size: 10pt;
 }
 
 /* table */
@@ -80,8 +80,8 @@ td {
 
 /* search box */
 #results {
-    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-    font-size: 9pt;
+    font-family: Georgia, serif;
+    font-size: 10pt;
     position: relative;
     left: 10px;
     top: 400px;
@@ -89,4 +89,11 @@ td {
 
 #results #search-box {
     padding: 5px;
+    font-family: Georgia, serif;
+    font-size: 10pt;
+}
+
+/* buttons */
+button:hover {
+	cursor: pointer;
 }

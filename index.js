@@ -12,7 +12,7 @@ var margin = {
 	left: 50
 };
 
-var width = 960,
+var width = 600,
 	height = 400;
 
 var svg = d3.select('body').append('svg')
@@ -21,7 +21,7 @@ var svg = d3.select('body').append('svg')
 
 var projection = d3.geo.albersUsa()
 	.scale(600)
-	.translate([width/4, 150]);
+	.translate([220, 150]);
 
 var path = d3.geo.path().projection(projection);
 
@@ -247,7 +247,6 @@ function buildTableHeader() {
 		tableHeader = document.createElement('table');
 
 	tableHeader.style.width = '500px'; 
-	tableHeader.style.border = '1px solid black';
 	tableHeader.style.cssText = 'margin-top: -385px;';
 
 	var tableRow = tableHeader.insertRow();
@@ -256,6 +255,9 @@ function buildTableHeader() {
 		td.appendChild(document.createTextNode(displayColumnNames[j]));
 		td.style.border = '1px solid white';
 		td.style.textAlign = 'center';
+		td.style.backgroundColor = 'lightslategray';
+		td.style.color = 'white';
+		td.style.opacity = '0.9';
 	}
 	body.appendChild(tableHeader);
 }
