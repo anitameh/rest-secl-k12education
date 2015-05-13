@@ -27,8 +27,8 @@
 h1 {
     position: absolute;
     font-family: Impact;
-    top: 50px;
-    left: 160px;
+    top: 10px;
+    left: 145px;
     color: #333;
 }
 
@@ -43,7 +43,8 @@ h2 {
 }
 
 #stateselector {
-	padding: 10px;
+	margin-left: 10px;
+	margin-top: -40px;
 	font-family: Georgia, serif;
     font-size: 10pt;
 }
@@ -63,9 +64,8 @@ table.hide {
 table {
     font-family: Verdana;
     font-size: 8pt;
-    width: 500px;
-    margin-top: 10px;
-    /*-webkit-opacity: 1 300ms; */
+    /*width: 500px;*/
+    margin-top: 90px;
 }
 
 td {
@@ -76,6 +76,7 @@ td {
 #table-container {
 	position: absolute;
 	width: 100%;
+	margin-top: 10px;
 }
 
 /* search box */
@@ -84,13 +85,14 @@ td {
     font-size: 10pt;
     position: relative;
     left: 10px;
-    top: 400px;
+    top: 350px;
 }
 
 #results #search-box {
-    padding: 5px;
     font-family: Georgia, serif;
     font-size: 10pt;
+    height: 25px;
+    width: 200px;
 }
 
 /* buttons */

@@ -13,7 +13,7 @@ var margin = {
 };
 
 var width = 600,
-	height = 400;
+	height = 350;
 
 var svg = d3.select('body').append('svg')
 			.attr('width', width)
@@ -246,13 +246,15 @@ function buildTableHeader() {
 	var body = document.body,
 		tableHeader = document.createElement('table');
 
-	tableHeader.style.width = '500px'; 
-	tableHeader.style.cssText = 'margin-top: -385px;';
+	// tableHeader.style.width = '500px'; 
+	tableHeader.style.cssText = 'margin-top: -310px;';
 
 	var tableRow = tableHeader.insertRow();
 	for (var j=0; j<displayColumnNames.length; j++) {
-		var td = tableRow.insertCell()
+		var td = tableRow.insertCell();
 		td.appendChild(document.createTextNode(displayColumnNames[j]));
+		td.style.width = '79px';
+		td.style.height = '40px';
 		td.style.border = '1px solid white';
 		td.style.textAlign = 'center';
 		td.style.backgroundColor = 'lightslategray';
@@ -260,6 +262,28 @@ function buildTableHeader() {
 		td.style.opacity = '0.9';
 	}
 	body.appendChild(tableHeader);
+}
+
+
+function buildOneRow(rowOfData) {
+
+	var body = document.body,
+		row = document.createElement('table');
+
+	row.style.cssText = 'margin-top: 0px';
+
+	var rowContent = row.insertRow();
+	for (var j=0; j<rowOfData.length; j++) {
+		var td = rowContent.insertCell();
+		td.appendChild(document.createTextNode(rowOfData[j]));
+		td.style.width = '80px';
+		td.style.height = '45px';
+		td.style.textAlign = 'left';
+		td.style.backgroundColor = 'Gainsboro';
+		td.style.color = 'black';
+		td.style.opacity = '0.9';
+	}
+	body.appendChild(row);
 }
 
 // function: build table
@@ -270,33 +294,37 @@ function buildTable(data) {
 
 		buildTableHeader();
 
-		// create table
-		var table = d3.select('.table-container').append('table'),
-			tbody = table.append('tbody');
+		// buildOneRow(data[0]);
+		for (var i=0; i<data.length; i++) {
+			buildOneRow(data[i]);
+		}
+		// // create table
+		// var table = d3.select('.table-container').append('table'),
+		// 	tbody = table.append('tbody');
 
-		// create rows of table
-		var rows = tbody.selectAll('tr')
-			.data(data)
-			.enter().append('tr');
+		// // create rows of table
+		// var rows = tbody.selectAll('tr')
+		// 	.data(data)
+		// 	.enter().append('tr');
 
+		// // cells
+		// // update cells of row with text
+		// var cells = rows.selectAll('td')
+		// 	.data( function( row ) {
+		// 		return columnNames.map( function(name, i) {
+		// 			return {name:name, value:row[i]};
+		// 		});
+		// 	})
+		// 	.enter()
+		// 	.append('td')
+		// 		.text(function(d) { return d.value; });
+		// // animate (fade in)
 		// cells
-		// update cells of row with text
-		var cells = rows.selectAll('td')
-			.data( function( row ) {
-				return columnNames.map( function(name, i) {
-					return {name:name, value:row[i]};
-				});
-			})
-			.enter()
-			.append('td')
-				.text(function(d) { return d.value; });
-		// animate (fade in)
-		cells
-			.style('opacity', 0)
-			.transition()
-				.delay(100)
-				.duration(500)
-				.style('opacity', 1);
+		// 	.style('opacity', 0)
+		// 	.transition()
+		// 		.delay(100)
+		// 		.duration(500)
+		// 		.style('opacity', 1);
 	}
 	else {
 		var noDataMessage = 'No data to display. Select a different state or school.';
