@@ -298,36 +298,9 @@ function buildTable(data) {
 		for (var i=0; i<data.length; i++) {
 			buildOneRow(data[i]);
 		}
-		// // create table
-		// var table = d3.select('.table-container').append('table'),
-		// 	tbody = table.append('tbody');
-
-		// // create rows of table
-		// var rows = tbody.selectAll('tr')
-		// 	.data(data)
-		// 	.enter().append('tr');
-
-		// // cells
-		// // update cells of row with text
-		// var cells = rows.selectAll('td')
-		// 	.data( function( row ) {
-		// 		return columnNames.map( function(name, i) {
-		// 			return {name:name, value:row[i]};
-		// 		});
-		// 	})
-		// 	.enter()
-		// 	.append('td')
-		// 		.text(function(d) { return d.value; });
-		// // animate (fade in)
-		// cells
-		// 	.style('opacity', 0)
-		// 	.transition()
-		// 		.delay(100)
-		// 		.duration(500)
-		// 		.style('opacity', 1);
 	}
 	else {
-		var noDataMessage = 'No data to display. Select a different state or school.';
+		var noDataMessage = 'There is no data for this school! Select another state or school.';
 		d3.select('body').append('h2')
 			.style('opacity', 0)
 			.transition()
@@ -353,6 +326,9 @@ function getSchoolNames( data ) {
 function onChangeInput(e) {
 	var text = document.querySelector('#search-box').value;
     query = (text.trim()).toUpperCase();
+    if (text === '') {
+    	d3.select('body').selectAll('h2').remove();
+    }
     // now that we have the query, change table to filter and only include query results
     stateData = undefined;
     buildTableForSchool( stateData, query );
