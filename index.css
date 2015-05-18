@@ -64,7 +64,6 @@ table.hide {
 table {
     font-family: Verdana;
     font-size: 8pt;
-    /*width: 500px;*/
     margin-top: 90px;
 }
 
@@ -77,6 +76,7 @@ td {
 	position: absolute;
 	width: 100%;
 	margin-top: 10px;
+
 }
 
 /* search box */

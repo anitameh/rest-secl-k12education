@@ -1,7 +1,7 @@
 /**
  * @author: Anita Mehrotra
  * @date: May 7, 2015
- * @version: 4.0
+ * @version: 5.0
 */
 
 // init variables
@@ -181,8 +181,14 @@ function buildTableForSchool( stateData, schoolQuery ) {
 			if (stateOnScreen === null) {
 				// If schoolQuery defined, stateData undefined AND no state selected,
 				//  show msg to select state first
-				var noStateMessage = d3.select('body').append('h2');
-				noStateMessage.html( 'Please select a state first!' );
+				var noStateMessage = 'Please select a state first.'
+				d3.select('body').append('h2')
+					.style('opacity', 0)
+					.transition()
+						.delay(100)
+						.duration(750)
+						.style('opacity', 1)
+						.text( noStateMessage );
 			}
 			else {
 				// If schoolQuery defined and stateData undefined but state selected,
@@ -246,7 +252,6 @@ function buildTableHeader() {
 	var body = document.body,
 		tableHeader = document.createElement('table');
 
-	// tableHeader.style.width = '500px'; 
 	tableHeader.style.cssText = 'margin-top: -310px;';
 
 	var tableRow = tableHeader.insertRow();
@@ -265,14 +270,15 @@ function buildTableHeader() {
 }
 
 
+// function: builds just one row of the table
 function buildOneRow(rowOfData) {
 
 	var body = document.body,
 		row = document.createElement('table');
 
 	row.style.cssText = 'margin-top: 0px';
-
 	var rowContent = row.insertRow();
+
 	for (var j=0; j<rowOfData.length; j++) {
 		var td = rowContent.insertCell();
 		td.appendChild(document.createTextNode(rowOfData[j]));
@@ -286,15 +292,13 @@ function buildOneRow(rowOfData) {
 	body.appendChild(row);
 }
 
-// function: build table
+
+// function: build entire table using buildTableHeader and buildOneRow
 function buildTable(data) {
 
 	if (data.length != 0) {
 		// If there's data, init table + headers + body
-
 		buildTableHeader();
-
-		// buildOneRow(data[0]);
 		for (var i=0; i<data.length; i++) {
 			buildOneRow(data[i]);
 		}
