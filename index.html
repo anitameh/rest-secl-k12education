@@ -6,31 +6,20 @@
     </head>
     <body>
     	<!-- libraries -->
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.3.3/underscore-min.js"></script>
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <script src="http://d3js.org/queue.v1.min.js"></script>
-        <script src="http://d3js.org/topojson.v1.min.js"></script>        
+        <script src="http://d3js.org/topojson.v1.min.js"></script>
+        <script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script> 
+        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.js"></script>        
 
         <!-- css -->
         <link rel="stylesheet" type="text/css" href="index.css">
-
-        <!-- search box & buttons -->
-        <div id="results">
-            Search for your school: <br>
-            <input type="text" id="search-box"/>
-            <button type="submit" id="search-button" style="border: 0; background: transparent; outline-style: none">
-            	<img src="/img/search-button.png" width="25" height="25" alt="submit"/>
-            </button>
-            <button type="submit" id="reset-button" style="border: 0; background: transparent; outline-style: none">
-            	<img src="/img/reset-button.png" width="25" height="25" alt="submit"/>
-            </button>
-        </div>  
 
         <!-- map and table container -->
         <div id="stateselector">
         	Select a state.
         </div>
         <script src="index.js"></script>
-        <div class="table-container" style="overflow-y:auto; height:350px; width:100%"></div>
+        <table id="example">
     </body>
 </html>
