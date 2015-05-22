@@ -27,7 +27,7 @@ var path = d3.geo.path().projection(projection);
 
 // global vars
 var query,
-	table, 
+	state,
 	columnNames = ['School', 'Total Enrolled', 'Mechanical, DISABLED',
 		'Seclusions, DISABLED', 'Physical, DISABLED', 'Mechanical, NOT DISABLED',
 		'Physical, NOT DISABLED', 'Seclusions, NOT DISABLED'];
@@ -44,7 +44,7 @@ d3.json('data/us-named.json', function(error, usa) {
 		.selectAll('path').data(usaMap)
 		.enter().append('path')
 			.attr('d', path)
-			.on('click', onChooseState);
+			.on('click', onChooseState); // this is where we choose a state and draw the corresponding table
 
 	svg.append('g').append('path')
 		.datum(topojson.mesh(usa, usa.objects.states, function(a,b) { return a !== b; }))
@@ -65,7 +65,7 @@ function onChooseState(d) {
 	d3.select('h1').remove();
 	d3.select('h2').remove();
 	
-	// get updated state name
+	// create new state name title
 	var actualStateName = d.properties.name;
 	d3.select('body').append('h1')
 		.style('opacity', 0) // before transition
@@ -75,8 +75,12 @@ function onChooseState(d) {
 			.style('opacity', 1)
 			.text( actualStateName ); // end of transition state
 
-	// create table
-	var state = d.properties.code;
+	// var previousState = state;
+	// console.log('previous state:', previousState);
+	state = d.properties.code; // get currently clicked state
+	// console.log('current state:', state);
+
+	// create new table
 	var pathname = 'data/' + state + '.csv';
 	d3.csv( pathname, function(error, data) {
 		var stateData = computeStateMetrics(data); // compute metrics
@@ -150,11 +154,10 @@ function buildTable(data) {
 	if (data.length != 0) {
 
 		// If there's data, create table
-		table = $(document).ready(function() {
+		$(document).ready(function() {
 			$('#demo').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>');
 
-			$('#example').dataTable({
-				'retrieve': true,
+			var table = $('#example').dataTable({
 				'data': data,
 				'columns': [
 					{'title': columnNames[0]}, 
@@ -173,6 +176,7 @@ function buildTable(data) {
 				'info': false
 			});
 		});
+
 	}
 	else {
 		var noDataMessage = 'There is no data available for this state or school.';
