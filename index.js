@@ -28,6 +28,7 @@ var path = d3.geo.path().projection(projection);
 // global vars
 var query,
 	state,
+	table,
 	columnNames = ['School', 'Total Enrolled', 'Mechanical, DISABLED',
 		'Seclusions, DISABLED', 'Physical, DISABLED', 'Mechanical, NOT DISABLED',
 		'Physical, NOT DISABLED', 'Seclusions, NOT DISABLED'];
@@ -44,7 +45,8 @@ d3.json('data/us-named.json', function(error, usa) {
 		.selectAll('path').data(usaMap)
 		.enter().append('path')
 			.attr('d', path)
-			.on('click', onChooseState); // this is where we choose a state and draw the corresponding table
+			.on('click', onChooseState);
+			// onChooseState); // this is where we choose a state and draw the corresponding table
 
 	svg.append('g').append('path')
 		.datum(topojson.mesh(usa, usa.objects.states, function(a,b) { return a !== b; }))
@@ -64,7 +66,7 @@ function onChooseState(d) {
 	// remove old state name, "no data" message, and old table
 	d3.select('h1').remove();
 	d3.select('h2').remove();
-	
+
 	// create new state name title
 	var actualStateName = d.properties.name;
 	d3.select('body').append('h1')
@@ -75,10 +77,7 @@ function onChooseState(d) {
 			.style('opacity', 1)
 			.text( actualStateName ); // end of transition state
 
-	// var previousState = state;
-	// console.log('previous state:', previousState);
 	state = d.properties.code; // get currently clicked state
-	// console.log('current state:', state);
 
 	// create new table
 	var pathname = 'data/' + state + '.csv';
@@ -157,7 +156,7 @@ function buildTable(data) {
 		$(document).ready(function() {
 			$('#demo').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>');
 
-			var table = $('#example').dataTable({
+			table = $('#example').DataTable({
 				'data': data,
 				'columns': [
 					{'title': columnNames[0]}, 
@@ -169,12 +168,15 @@ function buildTable(data) {
 					{'title': columnNames[6]},
 					{'title': columnNames[7]}
 				],
-				'scrollY': '250px',
+				'scrollY': '300px',
 				'scrollCollapse': true,
 				'paging': false,
-				'ordering': false,
-				'info': false
+				'info': false, 
+				'retrieve': true
 			});
+			table.rows().clear();
+			table.rows.add(data);
+			table.draw();
 		});
 
 	}
