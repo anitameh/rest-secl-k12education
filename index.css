@@ -8,6 +8,10 @@
     fill: lightslategray;
 }
 
+#states:hover {
+    cursor: pointer;
+}
+
 #states .active {
     fill: crimson;
     fill-opacity: 0.9;
@@ -76,7 +80,7 @@ tr:nth-child(even) {
 }
 
 tr:nth-child(odd) {
-    background-color: Gainsboro;
+    background-color: rgba(119, 136, 153, 0.2);
 }
 
 td {

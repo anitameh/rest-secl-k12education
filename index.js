@@ -1,6 +1,6 @@
 /**
  * @author: Anita Mehrotra
- * @date: May 7, 2015
+ * @date: May 26, 2015
  * @version: 5.0
 */
 
@@ -181,14 +181,19 @@ function buildTable(data) {
 
 	}
 	else {
-		var noDataMessage = 'There is no data available for this state or school.';
-		d3.select('body').append('h2')
-			.style('opacity', 0)
-			.transition()
-				.delay(100)
-				.duration(750)
-				.style('opacity', 1)
-				.text( noDataMessage );
+		if (String(table) === 'undefined') {
+			var noDataMessage = 'There is no data available for this state or school.';
+			d3.select('body').append('h2')
+				.style('opacity', 0)
+				.transition()
+					.delay(100)
+					.duration(750)
+					.style('opacity', 1)
+					.text( noDataMessage );
+		}
+		else {
+			table.rows().clear().draw();  // if a table DOES exist, display empty table
+		}
 	}
 }
 
@@ -203,10 +208,10 @@ function getSchoolNames( data ) {
 }
 
 
-// function: convert state name to/from abbreviation
-function abbrState(input, to){
-    
-    var states = [
+// function: convert state name to/from abbreviation 
+// (c/o: Caleb Grove - https://gist.github.com/CalebGrove)
+function abbrState(input, to) {
+	var states = [
         ['Arizona', 'AZ'],
         ['Alabama', 'AL'],
         ['Alaska', 'AK'],
