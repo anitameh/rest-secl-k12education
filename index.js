@@ -79,7 +79,7 @@ function onChooseState(d) {
 	// create new state name title
 	var actualStateName = d.properties.name;
 	d3.select('body').append('h1')
-		.style('margin-left', width/2.25 - actualStateName.length*3 + 'px') // position
+		.style('margin-left', width/2.5 - actualStateName.length*3 + 'px') // position
 		.style('opacity', 0) // before transition
 		.transition()
 			.delay(100)
