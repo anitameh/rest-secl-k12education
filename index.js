@@ -12,16 +12,16 @@ var margin = {
 	left: 50
 };
 
-var width = 600,
-	height = 350;
+var width = 630,
+	height = 400;
 
 var svg = d3.select('body').append('svg')
 			.attr('width', width)
 			.attr('height', height);
 
 var projection = d3.geo.albersUsa()
-	.scale(600)
-	.translate([220, 180]);
+	.scale(800)
+	.translate([340, 220]);
 
 var path = d3.geo.path().projection(projection);
 
@@ -30,7 +30,7 @@ var query,
 	state,
 	table,
 	columnNames = ['School', 'Total Enrolled', 'Mechanical, DISABLED',
-		'Seclusions, DISABLED', 'Physical, DISABLED', 'Mechanical, NOT DISABLED',
+		'Physical, DISABLED', 'Seclusions, DISABLED', 'Mechanical, NOT DISABLED',
 		'Physical, NOT DISABLED', 'Seclusions, NOT DISABLED'];
 
 
@@ -45,8 +45,17 @@ d3.json('data/us-named.json', function(error, usa) {
 		.selectAll('path').data(usaMap)
 		.enter().append('path')
 			.attr('d', path)
+			.on('mouseover', function() {
+				d3.select(this)
+					.attr('fill', 'gold')
+					.style('fill-opacity', 0.75);
+			})
+			.on('mouseout', function() {
+				d3.select(this)
+					.attr('fill', 'lightslategray')
+					.style('fill-opacity', 0.95);
+			})
 			.on('click', onChooseState);
-			// onChooseState); // this is where we choose a state and draw the corresponding table
 
 	svg.append('g').append('path')
 		.datum(topojson.mesh(usa, usa.objects.states, function(a,b) { return a !== b; }))
@@ -70,12 +79,13 @@ function onChooseState(d) {
 	// create new state name title
 	var actualStateName = d.properties.name;
 	d3.select('body').append('h1')
+		.style('margin-left', width/2.25 - actualStateName.length*3 + 'px') // position
 		.style('opacity', 0) // before transition
 		.transition()
 			.delay(100)
 			.duration(750)
 			.style('opacity', 1)
-			.text( actualStateName ); // end of transition state
+			.text(actualStateName.toUpperCase());
 
 	state = d.properties.code; // get currently clicked state
 
@@ -108,12 +118,12 @@ function computeStateMetrics(data) {
 		var seclusions_reg = parseInt( d.no_dis_seclusion );
 
 		// compute percentages
-		var mechDisabled = (mechRestraints_idea + mechRestraints_504) / totalEnroll;
-		var mechRegular = mechRestraints_reg / totalEnroll;
-		var physDisabled = (physRestraints_idea + physRestraints_504) / totalEnroll;
-		var physRegular = physRestraints_reg / totalEnroll;
-		var seclDisabled = (seclusions_idea + seclusions_504) / totalEnroll;
-		var seclRegular = seclusions_reg / totalEnroll;
+		var mechDisabled = ((mechRestraints_idea + mechRestraints_504) / totalEnroll)*100;
+		var mechRegular = (mechRestraints_reg / totalEnroll)*100;
+		var physDisabled = ((physRestraints_idea + physRestraints_504) / totalEnroll)*100;
+		var physRegular = (physRestraints_reg / totalEnroll)*100;
+		var seclDisabled = ((seclusions_idea + seclusions_504) / totalEnroll)*100;
+		var seclRegular = (seclusions_reg / totalEnroll)*100;
 
 		// return only if percentages exist AND are in [0,1]
 		if ( (mechDisabled != 0 || mechRegular != 0 || physDisabled != 0 || physRegular != 0 || seclDisabled != 0 || seclRegular != 0) &&
@@ -121,25 +131,25 @@ function computeStateMetrics(data) {
 
 			// trim decimals
 			if (mechDisabled != 0) {
-				mechDisabled = parseFloat(mechDisabled).toFixed(4);
+				mechDisabled = String(parseFloat(mechDisabled).toFixed(3)) + '%';
 			}
 			if (mechRegular != 0) {
-				mechRegular = parseFloat(mechRegular).toFixed(4);
+				mechRegular = String(parseFloat(mechRegular).toFixed(3)) + '%';
 			}
 			if (physDisabled != 0) {
-				physDisabled = parseFloat(physDisabled).toFixed(4);
+				physDisabled = String(parseFloat(physDisabled).toFixed(3)) + '%';
 			}
 			if (physRegular != 0) {
-				physRegular = parseFloat(physRegular).toFixed(4);
+				physRegular = String(parseFloat(physRegular).toFixed(3)) + '%';
 			}
 			if (seclDisabled != 0) {
-				seclDisabled = parseFloat(seclDisabled).toFixed(4);
+				seclDisabled = String(parseFloat(seclDisabled).toFixed(3)) + '%';
 			}
 			if (seclRegular != 0) {
-				seclRegular = parseFloat(seclRegular).toFixed(4);
+				seclRegular = String(parseFloat(seclRegular).toFixed(3)) + '%';
 			}
 
-			allData[ j ] = [d.School_name, totalEnroll, mechDisabled, mechRegular, physDisabled, physRegular, seclDisabled, seclRegular ];
+			allData[ j ] = [d.School_name, totalEnroll, mechDisabled, physDisabled, seclDisabled, mechRegular, physRegular, seclRegular ];
 			j = j+1;
 		}
 	});
@@ -178,6 +188,11 @@ function buildTable(data) {
 			table.rows.add(data);
 			table.draw();
 		});
+
+		$('.dataTables_filter input')
+			.attr('placeholder', "Type your school's name here");
+
+		// $('#example').css('display', 'inline');
 
 	}
 	else {
