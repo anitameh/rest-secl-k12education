@@ -87,6 +87,7 @@ td {
     border-top: 2px solid white;
     border-bottom: 2px solid white;
     padding: 8px;
+    text-align: center;
 }
 
 /* search box */
@@ -112,7 +113,7 @@ td {
     margin-left: 140px;
 }
 
+/* header row */
 .dataTables_scrollHead:hover {
     cursor: pointer;
 }
-

@@ -29,9 +29,9 @@ var path = d3.geo.path().projection(projection);
 var query,
 	state,
 	table,
-	columnNames = ['School', 'Total Enrolled', 'Mechanical, DISABLED',
-		'Physical, DISABLED', 'Seclusions, DISABLED', 'Mechanical, NOT DISABLED',
-		'Physical, NOT DISABLED', 'Seclusions, NOT DISABLED'];
+	columnNames = ['School', 'Total Enrolled', 'Mechanical, Disabled',
+		'Physical, Disabled', 'Seclusions, Disabled', 'Mechanical, Not Disabled',
+		'Physical, Not Disabled', 'Seclusions, Not Disabled'];
 
 
 // load data and execute
@@ -45,6 +45,11 @@ d3.json('data/us-named.json', function(error, usa) {
 		.selectAll('path').data(usaMap)
 		.enter().append('path')
 			.attr('d', path)
+			.attr('class', function(d) {
+				if (d.properties.code == 'NY') { // pre-select New York
+					return 'active';
+				}
+			})
 			.on('mouseover', function() {
 				d3.select(this)
 					.attr('fill', 'gold')
@@ -62,7 +67,34 @@ d3.json('data/us-named.json', function(error, usa) {
 		.attr('id', 'state-borders')
 		.attr('d', path);
 
+	// pre-select New York
+	// New York header
+	d3.select('body').append('h1')
+		.style('margin-left', '270px')
+		.style('opacity', 0)
+		.transition()
+			.delay(100)
+			.duration(750)
+			.style('opacity', 1)
+			.text('NEW YORK');
+
+	// New York table
+	state = 'NY';
+	var pathname = 'data/NY.csv';
+	d3.csv(pathname, function(error, data) {
+		var stateData = computeStateMetrics(data);
+		buildTable(stateData);
+	});
+
 });
+
+
+// function: change New York's state color
+function changeNYColor(d) {
+	var value = d.properties.value;
+	console.log(value);
+	return 'purple';
+}
 
 
 // function: choose state
